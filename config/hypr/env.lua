@@ -28,11 +28,20 @@ hl.env("SSH_AUTH_SOCK", util.home .. "/.1password/agent.sock")
 
 -- The login session's PATH has no user bins; every bind that calls bin/
 -- and the swappy shim depend on this.
-local user_bins = util.home .. "/.local/bin:" .. util.home .. "/.bun/bin"
-local path = os.getenv("PATH") or "/usr/bin"
-if not path:find(user_bins, 1, true) then
-    hl.env("PATH", user_bins .. ":" .. path)
+local user_bins = { util.home .. "/.local/bin", util.home .. "/.bun/bin" }
+local path = {}
+local seen = {}
+for _, dir in ipairs(user_bins) do
+    path[#path + 1] = dir
+    seen[dir] = true
 end
+for dir in (os.getenv("PATH") or "/usr/bin"):gmatch("[^:]+") do
+    if not seen[dir] then
+        path[#path + 1] = dir
+        seen[dir] = true
+    end
+end
+hl.env("PATH", table.concat(path, ":"))
 
 -- NVIDIA, only when the driver is actually live. Reading procfs is cheap;
 -- probing the GPU with nvidia-smi is not and can blow the config load budget
