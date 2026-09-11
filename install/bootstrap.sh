@@ -6,7 +6,12 @@
 
 step "bootstrap"
 
-sudo pacman -Syu --needed --noconfirm base-devel git curl unzip
+# No -y: refreshing the sync database without upgrading invites a partial
+# upgrade. A 404 here means the database is stale; that is the cue for a
+# deliberate `sudo pacman -Syu`, not something to do silently.
+if ! sudo pacman -S --needed --noconfirm base-devel git curl unzip; then
+    die "package download failed; if it was a 404, run 'sudo pacman -Syu' and rerun"
+fi
 
 if [ -x "$BUN" ] && [ "$("$BUN" --version)" = "$BUN_VERSION" ]; then
     info "bun $BUN_VERSION present"

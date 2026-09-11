@@ -36,6 +36,8 @@ Steps, in order: `bootstrap`, `packages`, `dotfiles`, `services`, `theming`, `sd
 Run one with `--only <step>`, drop one with `--skip <step>`. Every step is safe to run again.
 Anything the symlinks displace goes to `~/.dotfiles-backup/<timestamp>/`.
 
+The installer never refreshes the package database on its own, so it cannot cause a partial upgrade. If a download 404s because the database is stale, run `sudo pacman -Syu` yourself and rerun the step.
+
 `gpu` edits `/etc/mkinitcpio.conf` and rebuilds the initramfs when it changes something. Reboot after.
 
 ## Cutover from HyDE

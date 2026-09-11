@@ -21,5 +21,7 @@ if [ ${#missing[@]} -eq 0 ]; then
     info "all packages present"
 else
     info "installing ${#missing[@]}: ${missing[*]}"
-    yay -S --needed --noconfirm "${missing[@]}"
+    if ! yay -S --needed --noconfirm "${missing[@]}"; then
+        die "package install failed; if it was a 404, run 'sudo pacman -Syu' and rerun"
+    fi
 fi
