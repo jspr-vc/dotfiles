@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Caelestia scheme hook: keep the SDDM theme on the current scheme and
+# wallpaper. Runs with SCHEME_COLOURS/SCHEME_MODE from the hook, or reads
+# Caelestia's state when invoked by hand.
+
+set -euo pipefail
+
+theme_dir="/usr/share/sddm/themes/caelestia"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/caelestia"
+
+if [ ! -d "$theme_dir" ] || [ ! -w "$theme_dir" ]; then
+    echo "$(basename "$0"): $theme_dir is missing or not writable; run the installer" >&2
+    exit 1
+fi
+
+if [ -n "${SCHEME_COLOURS:-}" ]; then
+    colours="$SCHEME_COLOURS"
+    mode="${SCHEME_MODE:-dark}"
+else
+    colours=$(jq -c '.colours' "$state_dir/scheme.json")
+    mode=$(jq -r '.mode' "$state_dir/scheme.json")
+fi
+
+colour() {
+    jq -r --arg k "$1" '.[$k]' <<<"$colours"
+}
+
+{
+    echo "[General]"
+    echo "Background=background.jpg"
+    echo "Mode=$mode"
+    echo "Primary=$(colour primary)"
+    echo "OnPrimary=$(colour onPrimary)"
+    echo "PrimaryContainer=$(colour primaryContainer)"
+    echo "OnPrimaryContainer=$(colour onPrimaryContainer)"
+    echo "Surface=$(colour surface)"
+    echo "OnSurface=$(colour onSurface)"
+    echo "SurfaceContainer=$(colour surfaceContainer)"
+    echo "SurfaceContainerHigh=$(colour surfaceContainerHigh)"
+    echo "OnSurfaceVariant=$(colour onSurfaceVariant)"
+    echo "Outline=$(colour outline)"
+    echo "OutlineVariant=$(colour outlineVariant)"
+    echo "Error=$(colour error)"
+    echo "Font=JetBrainsMono Nerd Font"
+} >"$theme_dir/theme.conf.tmp"
+mv -f "$theme_dir/theme.conf.tmp" "$theme_dir/theme.conf"
+
+wallpaper_file="$state_dir/wallpaper/path.txt"
+if [ -r "$wallpaper_file" ]; then
+    wallpaper=$(<"$wallpaper_file")
+    if [ -f "$wallpaper" ]; then
+        cp -f "$wallpaper" "$theme_dir/background.jpg.tmp"
+        mv -f "$theme_dir/background.jpg.tmp" "$theme_dir/background.jpg"
+    fi
+fi

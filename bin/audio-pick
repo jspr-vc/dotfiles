@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Keyboard-only picker for the default PipeWire sink or source.
+#
+# Usage: audio-pick <output|input>
+
+set -euo pipefail
+
+if pgrep -x fuzzel >/dev/null; then
+    pkill -x fuzzel
+    exit 0
+fi
+
+kind="${1:-}"
+case "$kind" in
+output | sink | -o)
+    class="Audio/Sink"
+    default="@DEFAULT_AUDIO_SINK@"
+    prompt="󰕾 Audio Output "
+    glyph_on="󰕾"
+    glyph_off="󰖀"
+    toast_title="Audio Output"
+    toast_icon="speaker"
+    ;;
+input | source | -i)
+    class="Audio/Source"
+    default="@DEFAULT_AUDIO_SOURCE@"
+    prompt="󰍬 Audio Input "
+    glyph_on="󰍬"
+    glyph_off="󰍮"
+    toast_title="Audio Input"
+    toast_icon="mic"
+    ;;
+*)
+    echo "usage: $(basename "$0") <output|input>" >&2
+    exit 1
+    ;;
+esac
+
+dump=$(pw-dump)
+
+list_devices() {
+    jq -r --arg class "$class" \
+        '.[] | select(.info?.props?."media.class" == $class) | .info.props."node.description"' <<<"$dump" | sort -u
+}
+
+current=$(wpctl inspect "$default" | grep -oP 'node.description = "\K[^"]+' | head -1 || true)
+
+devices=$(list_devices)
+[ -n "$devices" ] || exit 1
+count=$(wc -l <<<"$devices")
+
+selected=$(while IFS= read -r dev; do
+    if [ "$dev" = "$current" ]; then
+        printf '%s  %s\n' "$glyph_on" "$dev"
+    else
+        printf '%s  %s\n' "$glyph_off" "$dev"
+    fi
+done <<<"$devices" | fuzzel --dmenu --prompt "$prompt" --placeholder "Select device" \
+    --select "$current" --lines "$count" --minimal-lines) || true
+
+[ -n "$selected" ] || exit 0
+selected="${selected#*  }"
+
+id=$(jq -r --arg class "$class" --arg sel "$selected" \
+    '.[] | select(.info?.props?."media.class" == $class and .info.props."node.description" == $sel) | .info.props."object.id"' <<<"$dump" | head -1)
+
+[ -n "$id" ] || exit 1
+wpctl set-default "$id"
+caelestia shell toaster success "$toast_title" "$selected" "$toast_icon" >/dev/null 2>&1 || true

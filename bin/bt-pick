@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Keyboard-only picker for paired bluetooth devices. Selecting a device
+# connects it, or disconnects it if it is already connected.
+
+set -euo pipefail
+
+if pgrep -x fuzzel >/dev/null; then
+    pkill -x fuzzel
+    exit 0
+fi
+
+list_paired() {
+    local line mac name
+    while IFS= read -r line; do
+        [ -n "$line" ] || continue
+        mac=$(awk '{print $2}' <<<"$line")
+        name=$(awk '{$1=""; $2=""; print}' <<<"$line" | sed 's/^ *//')
+        if bluetoothctl info "$mac" | grep -q "Connected: yes"; then
+            printf '󰂱  %s\t%s\n' "$name" "$mac"
+        else
+            printf '󰂯  %s\t%s\n' "$name" "$mac"
+        fi
+    done < <(bluetoothctl devices Paired)
+}
+
+devices=$(list_paired | sort)
+[ -n "$devices" ] || {
+    caelestia shell toaster warn "Bluetooth" "No paired devices" bluetooth >/dev/null 2>&1 || true
+    exit 0
+}
+count=$(wc -l <<<"$devices")
+
+index=$(cut -f1 <<<"$devices" | fuzzel --dmenu --index --prompt "󰂯 Bluetooth " \
+    --placeholder "Select device" --lines "$count" --minimal-lines) || true
+[ -n "$index" ] || exit 0
+
+entry=$(sed -n "$((index + 1))p" <<<"$devices")
+mac=$(cut -f2 <<<"$entry")
+name=$(cut -f1 <<<"$entry")
+name="${name#*  }"
+
+toast() { caelestia shell toaster "$1" "Bluetooth" "$2" bluetooth >/dev/null 2>&1 || true; }
+
+if bluetoothctl info "$mac" | grep -q "Connected: yes"; then
+    if bluetoothctl disconnect "$mac" >/dev/null; then
+        toast success "Disconnected: $name"
+    else
+        toast error "Failed to disconnect: $name"
+    fi
+else
+    toast info "Connecting: $name..."
+    if bluetoothctl connect "$mac" >/dev/null; then
+        toast success "Connected: $name"
+    else
+        toast error "Failed to connect: $name"
+    fi
+fi

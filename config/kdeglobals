@@ -1,0 +1,11 @@
+[Colors:View]
+BackgroundNormal=#00000000
+
+[General]
+TerminalApplication=ghostty
+
+[Icons]
+Theme=Tela-circle-dracula
+
+[Wallet]
+Enabled=false

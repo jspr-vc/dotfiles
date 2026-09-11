@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Suspend from hypridle, unless something is playing audio.
+
+set -euo pipefail
+
+playing=$(pw-dump | jq '[.[] | select(
+    (.info?.props?."media.class" // "" | test("^Stream/Output/Audio"))
+    and .info?.state == "running")] | length')
+
+if [ "${playing:-0}" -gt 0 ]; then
+    exit 0
+fi
+
+systemctl suspend

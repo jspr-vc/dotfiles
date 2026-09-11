@@ -1,0 +1,15 @@
+# Written by Caelestia at runtime into the symlinked config dirs
+config/hypr/scheme/current.lua
+config/hypr/scheme/current.conf
+config/caelestia/*.bak*
+config/caelestia/*.pre-*
+# Local state that lands in symlinked dirs
+config/zsh/.zcompdump*
+config/zsh/.zsh_history
+
+# bun editor types only; the installer never needs them
+node_modules/
+# Written by Caelestia into the symlinked gtk dir
+config/gtk-3.0/gtk.css
+config/gtk-3.0/thunar.css
+config/gtk-3.0/bookmarks

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Not swappy. Caelestia hardcodes `swappy -f <file|->` for screenshot
+# annotation and depends on the package, so this shim in ~/.local/bin shadows
+# it and hands the image to satty instead. Nothing else on the system calls
+# swappy.
+
+set -euo pipefail
+
+file=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+    -f | --file) file="$2"; shift 2 ;;
+    -f*) file="${1#-f}"; shift ;;
+    *) shift ;;
+    esac
+done
+
+[ -n "$file" ] || { echo "swappy shim: no -f <file> given" >&2; exit 1; }
+
+exec satty -f "$file" --copy-command wl-copy

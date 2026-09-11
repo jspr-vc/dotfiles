@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Screenshot through satty without Caelestia's picker. The SUPER+P binds use
+# `caelestia screenshot` (routed to satty by bin/swappy); this covers what that
+# cannot do, mainly capturing every monitor at once. Respects no_screen_share;
+# screenshot-unblocked is the variant that lifts it.
+#
+#   screenshot region     pick a region
+#   screenshot freeze     freeze the screen, then pick a region
+#   screenshot monitor    the focused monitor
+#   screenshot all        every monitor
+
+set -euo pipefail
+
+mode="${1:-region}"
+dir="${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots"
+mkdir -p "$dir"
+file="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
+
+freeze_pid=""
+cleanup() { [ -n "$freeze_pid" ] && kill "$freeze_pid" 2>/dev/null || true; }
+trap cleanup EXIT
+
+case "$mode" in
+region | freeze)
+    if [ "$mode" = freeze ]; then
+        hyprpicker -r -z &
+        freeze_pid=$!
+        sleep 0.2
+    fi
+    geom=$(slurp) || exit 0
+    grim -g "$geom" "$file"
+    ;;
+monitor)
+    output=$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')
+    grim -o "$output" "$file"
+    ;;
+all)
+    grim "$file"
+    ;;
+*)
+    echo "usage: $(basename "$0") region|freeze|monitor|all" >&2
+    exit 1
+    ;;
+esac
+cleanup
+freeze_pid=""
+
+satty -f "$file" -o "$file" --copy-command wl-copy

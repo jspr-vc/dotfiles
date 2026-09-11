@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Keyboard-only window switcher over every open Hyprland client.
+
+set -euo pipefail
+
+if pgrep -x fuzzel >/dev/null; then
+    pkill -x fuzzel
+    exit 0
+fi
+
+clients=$(hyprctl clients -j | jq -r '
+    map(select(.title != "" and .mapped))
+    | sort_by(.workspace.id)
+    | .[]
+    | "\(.address)\t\(.class) — \(.title) [ws \(.workspace.name)]"')
+
+[ -n "$clients" ] || exit 0
+count=$(wc -l <<<"$clients")
+[ "$count" -gt 15 ] && count=15
+
+index=$(cut -f2 <<<"$clients" | fuzzel --dmenu --index --prompt "󱂬 Windows " \
+    --placeholder "Switch to window" --lines "$count" --minimal-lines --width 80) || true
+[ -n "$index" ] || exit 0
+
+address=$(sed -n "$((index + 1))p" <<<"$clients" | cut -f1)
+[ -n "$address" ] || exit 1
+
+hyprctl dispatch "hl.dsp.focus({ window = \"address:$address\" })" >/dev/null
