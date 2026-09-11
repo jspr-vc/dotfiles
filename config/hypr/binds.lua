@@ -77,12 +77,24 @@ local function close_or_hide()
     end
 end
 
+-- A lone window that gets floated would otherwise keep its full tiled size,
+-- so shrink it to half the monitor first.
 local function float_centered()
+    local ws = hl.get_active_workspace()
+    local alone = ws ~= nil and ws.windows == 1
     hl.dispatch(hl.dsp.window.float({ action = "toggle" }))
     local win = hl.get_active_window()
-    if win and win.floating then
-        hl.dispatch(hl.dsp.window.center())
+    if not (win and win.floating) then
+        return
     end
+    local mon = win.monitor
+    if alone and mon and type(mon.size) == "table" then
+        hl.dispatch(hl.dsp.window.resize({
+            x = math.floor(mon.size.width / 2),
+            y = math.floor(mon.size.height / 2),
+        }))
+    end
+    hl.dispatch(hl.dsp.window.center())
 end
 
 local function cycle_to_top()
