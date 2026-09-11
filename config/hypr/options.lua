@@ -4,11 +4,11 @@
 hl.config({
     general = {
         layout = "dwindle",
-        gaps_in = 5,
+        gaps_in = 8,
         -- Matches Caelestia's screen frame: border rounding 25 minus this
         -- inset gives the 17px window rounding below, so the corners stay
         -- concentric.
-        gaps_out = 8,
+        gaps_out = 16,
         border_size = 2,
         resize_on_border = false,
         allow_tearing = false,
