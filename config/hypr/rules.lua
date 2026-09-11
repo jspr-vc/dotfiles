@@ -97,12 +97,12 @@ local protected = {
     { name = "1password", match = { class = "^(1password)$" } },
     { name = "1password-quick-access", match = { title = "^(Quick Access — 1Password)$" } },
     { name = "polkit-agent", match = { class = "^(hyprpolkitagent|polkit-gnome-authentication-agent-1)$" } },
-    -- Enable as needed:
-    -- { name = "discord", match = { class = "^(discord)$" } },
-    -- { name = "slack", match = { class = "^(Slack)$" } },
-    -- { name = "obs", match = { class = "^(com.obsproject.Studio)$" } },
-    -- { name = "env-files", match = { title = "^(nvim .*\\.env.*)$" } },
-    -- { name = "zen-private", match = { title = "^(.*Zen Browser Private Browsing)$" } },
+    { name = "discord", match = { class = "^(discord)$" } },
+    { name = "slack", match = { class = "^(Slack)$" } },
+    { name = "obs", match = { class = "^(com.obsproject.Studio)$" } },
+    { name = "env-files", match = { title = "^(nvim .*\\.env.*)$" } },
+    { name = "zen-private", match = { title = "^(.*Zen Browser Private Browsing)$" } },
+    { name = "steam", match = { class = "^(steam)$" } },
 }
 
 local state_file = util.state_dir .. "/screenshare-protection"
@@ -145,18 +145,6 @@ function M.toggle_screenshare_protection()
     set_protection(not protection_enabled())
 end
 
--- Warn the moment a share starts while the group is off. The share itself
--- is not blocked; the toast is the reminder to hit the toggle.
-hl.on("screenshare.state", function(active, _, name)
-    if active and not protection_enabled() then
-        hl.exec_cmd(
-            "caelestia shell toaster warn 'Sharing with protection OFF' 'every window is visible to "
-                .. tostring(name or "the share")
-                .. "' visibility"
-        )
-    end
-end)
-
 -- A fresh compositor always starts protected. The state file only bridges
 -- `hyprctl reload`, which re-runs this file mid-session.
 hl.on("hyprland.start", function()
@@ -174,7 +162,7 @@ end)
 
 hl.workspace_rule({
     workspace = "special:ai",
-    on_created_empty = "[float; center; size 50% 80%; noblur; animation slide top; noscreenshare; opaque] "
+    on_created_empty = "[float; center; size monitor_w*0.5 monitor_h*0.8; no_blur; animation slide top; no_screen_share; opaque] "
         .. "ghostty -e opencode",
 })
 hl.workspace_rule({ workspace = "special:special", gaps_out = 100 })
