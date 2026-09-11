@@ -3,6 +3,8 @@ MenuBar=Disabled
 [General]
 ShowSelectionToggle=false
 ShowStatusBar=false
+Version=202
+ViewPropsTimestamp=2026,9,11,13,52,23.562
 
 [IconsMode]
 MaximumTextLines=1
@@ -17,7 +19,6 @@ Places Icons Static Size=16
 
 [MainWindow]
 MenuBar=Disabled
-ToolBarsMovable=Disabled
 
 [MainWindow][Toolbar mainToolBar]
 IconSize=16

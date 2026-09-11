@@ -131,7 +131,8 @@ local function set_protection(on)
 
     if on then
         hl.exec_cmd(
-            "caelestia shell toaster success 'Screen-share protection on' 'protected windows are hidden from capture' visibility_off"
+            "caelestia shell toaster success 'Screen-share protection on' "
+                .. "'protected windows are hidden from capture' visibility_off"
         )
     else
         hl.exec_cmd(
@@ -173,7 +174,8 @@ end)
 
 hl.workspace_rule({
     workspace = "special:ai",
-    on_created_empty = "[float; center; size 50% 80%; noblur; animation slide top; noscreenshare; opaque] ghostty -e opencode",
+    on_created_empty = "[float; center; size 50% 80%; noblur; animation slide top; noscreenshare; opaque] "
+        .. "ghostty -e opencode",
 })
 hl.workspace_rule({ workspace = "special:special", gaps_out = 100 })
 
@@ -181,9 +183,21 @@ hl.workspace_rule({ workspace = "special:special", gaps_out = 100 })
 -- Layer rules
 --------------------------------------------------------------------------
 
-hl.layer_rule({ name = "caelestia-static", match = { namespace = "^(caelestia-(border-exclusion|area-picker))$" }, no_anim = true })
-hl.layer_rule({ name = "caelestia-fade", match = { namespace = "^(caelestia-(drawers|background))$" }, animation = "fade" })
+hl.layer_rule({
+    name = "caelestia-static",
+    match = { namespace = "^(caelestia-(border-exclusion|area-picker))$" },
+    no_anim = true,
+})
+hl.layer_rule({
+    name = "caelestia-fade",
+    match = { namespace = "^(caelestia-(drawers|background))$" },
+    animation = "fade",
+})
 hl.layer_rule({ name = "launcher-blur", match = { namespace = "^(launcher)$" }, animation = "popin 80%", blur = true })
-hl.layer_rule({ name = "picker-fade", match = { namespace = "^(hyprpicker|selection|wayfreeze)$" }, animation = "fade" })
+hl.layer_rule({
+    name = "picker-fade",
+    match = { namespace = "^(hyprpicker|selection|wayfreeze)$" },
+    animation = "fade",
+})
 
 return M

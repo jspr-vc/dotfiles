@@ -32,7 +32,11 @@ bind("CTRL + SHIFT + space", hl.dsp.exec_cmd("1password --quick-access"), "[Laun
 bind(MOD .. " + slash", hl.dsp.exec_cmd("keys-hint"), "[Launcher|Apps] keybind cheat sheet")
 bind(MOD .. " + comma", hl.dsp.exec_cmd("caelestia emoji -p"), "[Launcher|Apps] emoji and glyph picker")
 bind(MOD .. " + SHIFT + V", hl.dsp.exec_cmd("caelestia clipboard"), "[Launcher|Apps] clipboard history")
-bind(MOD .. " + SHIFT + CTRL + V", hl.dsp.exec_cmd("caelestia clipboard -d"), "[Launcher|Apps] delete from clipboard history")
+bind(
+    MOD .. " + SHIFT + CTRL + V",
+    hl.dsp.exec_cmd("caelestia clipboard -d"),
+    "[Launcher|Apps] delete from clipboard history"
+)
 bind(MOD .. " + Tab", hl.dsp.exec_cmd("win-pick"), "[Launcher|Apps] window switcher")
 
 --------------------------------------------------------------------------
@@ -47,7 +51,10 @@ bind(MOD .. " + E", hl.dsp.exec_cmd(explorer), "[Launcher|Apps] file explorer")
 bind(MOD .. " + B", hl.dsp.exec_cmd(browser), "[Launcher|Apps] web browser")
 bind(
     "CTRL + SHIFT + Escape",
-    hl.dsp.exec_cmd(terminal .. " -e btop", { float = true, size = { "monitor_w*0.7", "monitor_h*0.8" }, center = true }),
+    hl.dsp.exec_cmd(
+        terminal .. " -e btop",
+        { float = true, size = { "monitor_w*0.7", "monitor_h*0.8" }, center = true }
+    ),
     "[Launcher|Apps] system monitor"
 )
 
@@ -84,14 +91,22 @@ local function cycle_to_top()
 end
 
 bind(MOD .. " + W", close_or_hide, "[Window Management] close focused window")
-bind(MOD .. " + SHIFT + W", hl.dsp.workspace.toggle_special("hidden"), "[Window Management] show hidden windows (Steam)")
+bind(
+    MOD .. " + SHIFT + W",
+    hl.dsp.workspace.toggle_special("hidden"),
+    "[Window Management] show hidden windows (Steam)"
+)
 bind("ALT + F4", close_or_hide, "[Window Management] close focused window")
 bind(MOD .. " + V", float_centered, "[Window Management] toggle float")
 bind(MOD .. " + SHIFT + F", hl.dsp.window.pin(), "[Window Management] toggle pin")
 bind(MOD .. " + G", hl.dsp.group.toggle(), "[Window Management] toggle group")
 bind(MOD .. " + CTRL + H", hl.dsp.group.prev(), "[Window Management] previous window in group")
 bind(MOD .. " + CTRL + L", hl.dsp.group.next(), "[Window Management] next window in group")
-bind("SHIFT + F11", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }), "[Window Management] toggle fullscreen")
+bind(
+    "SHIFT + F11",
+    hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }),
+    "[Window Management] toggle fullscreen"
+)
 bind(
     "ALT + Return",
     hl.dsp.window.fullscreen_state({ internal = 2, client = 0, action = "toggle" }),
@@ -106,7 +121,8 @@ bind(MOD .. " + ALT + J", hl.dsp.layout("togglesplit"), "[Window Management] tog
 bind("ALT + Tab", cycle_to_top, "[Window Management] cycle focus")
 
 -- Focus
-local directions = { H = "left", J = "down", K = "up", L = "right", Left = "left", Down = "down", Up = "up", Right = "right" }
+local directions =
+    { H = "left", J = "down", K = "up", L = "right", Left = "left", Down = "down", Up = "up", Right = "right" }
 for key, dir in pairs(directions) do
     bind(MOD .. " + " .. key, hl.dsp.focus({ direction = dir }), "[Window Management|Change focus] focus " .. dir)
 end
@@ -157,7 +173,11 @@ bind(MOD .. " + X", hl.dsp.window.resize(), "[Window Management|Mouse] hold to r
 for i = 1, 10 do
     local key = tostring(i % 10)
     bind(MOD .. " + " .. key, hl.dsp.focus({ workspace = i }), "[Workspaces] go to workspace " .. i)
-    bind(MOD .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }), "[Workspaces] move window to workspace " .. i)
+    bind(
+        MOD .. " + SHIFT + " .. key,
+        hl.dsp.window.move({ workspace = i }),
+        "[Workspaces] move window to workspace " .. i
+    )
     bind(
         MOD .. " + ALT + " .. key,
         hl.dsp.window.move({ workspace = i, follow = false }),
@@ -170,13 +190,25 @@ bind(MOD .. " + CTRL + K", hl.dsp.focus({ workspace = "r-1" }), "[Workspaces] pr
 bind(MOD .. " + CTRL + Right", hl.dsp.focus({ workspace = "r+1" }), "[Workspaces] next workspace")
 bind(MOD .. " + CTRL + Left", hl.dsp.focus({ workspace = "r-1" }), "[Workspaces] previous workspace")
 bind(MOD .. " + CTRL + Down", hl.dsp.focus({ workspace = "empty" }), "[Workspaces] nearest empty workspace")
-bind(MOD .. " + CTRL + ALT + Right", hl.dsp.window.move({ workspace = "r+1" }), "[Workspaces] move window to next workspace")
-bind(MOD .. " + CTRL + ALT + Left", hl.dsp.window.move({ workspace = "r-1" }), "[Workspaces] move window to previous workspace")
+bind(
+    MOD .. " + CTRL + ALT + Right",
+    hl.dsp.window.move({ workspace = "r+1" }),
+    "[Workspaces] move window to next workspace"
+)
+bind(
+    MOD .. " + CTRL + ALT + Left",
+    hl.dsp.window.move({ workspace = "r-1" }),
+    "[Workspaces] move window to previous workspace"
+)
 bind(MOD .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }), "[Workspaces] next workspace")
 bind(MOD .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }), "[Workspaces] previous workspace")
 
 bind(MOD .. " + S", hl.dsp.workspace.toggle_special("special"), "[Workspaces] toggle scratchpad")
-bind(MOD .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:special" }), "[Workspaces] move window to scratchpad")
+bind(
+    MOD .. " + SHIFT + S",
+    hl.dsp.window.move({ workspace = "special:special" }),
+    "[Workspaces] move window to scratchpad"
+)
 bind(
     MOD .. " + ALT + S",
     hl.dsp.window.move({ workspace = "special:special", follow = false }),
@@ -197,21 +229,45 @@ bind("F10", hl.dsp.exec_cmd(volume_mute), "[Hardware Controls|Audio] toggle mute
 bind("F11", hl.dsp.exec_cmd(volume_down), "[Hardware Controls|Audio] decrease volume", locked_repeating)
 bind("F12", hl.dsp.exec_cmd(volume_up), "[Hardware Controls|Audio] increase volume", locked_repeating)
 bind("XF86AudioMute", hl.dsp.exec_cmd(volume_mute), "[Hardware Controls|Audio] toggle mute output", locked)
-bind("XF86AudioLowerVolume", hl.dsp.exec_cmd(volume_down), "[Hardware Controls|Audio] decrease volume", locked_repeating)
+bind(
+    "XF86AudioLowerVolume",
+    hl.dsp.exec_cmd(volume_down),
+    "[Hardware Controls|Audio] decrease volume",
+    locked_repeating
+)
 bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd(volume_up), "[Hardware Controls|Audio] increase volume", locked_repeating)
-bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute " .. source .. " toggle"), "[Hardware Controls|Audio] toggle mute microphone", locked)
+bind(
+    "XF86AudioMicMute",
+    hl.dsp.exec_cmd("wpctl set-mute " .. source .. " toggle"),
+    "[Hardware Controls|Audio] toggle mute microphone",
+    locked
+)
 
 bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), "[Hardware Controls|Media] play or pause", locked)
 bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), "[Hardware Controls|Media] play or pause", locked)
 bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), "[Hardware Controls|Media] next track", locked)
 bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), "[Hardware Controls|Media] previous track", locked)
 
-bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), "[Hardware Controls|Brightness] increase brightness", locked_repeating)
-bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), "[Hardware Controls|Brightness] decrease brightness", locked_repeating)
+bind(
+    "XF86MonBrightnessUp",
+    hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),
+    "[Hardware Controls|Brightness] increase brightness",
+    locked_repeating
+)
+bind(
+    "XF86MonBrightnessDown",
+    hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),
+    "[Hardware Controls|Brightness] decrease brightness",
+    locked_repeating
+)
 
 bind(MOD .. " + O", hl.dsp.exec_cmd("audio-pick output"), "[Hardware Controls|Audio] select audio output")
 bind(MOD .. " + I", hl.dsp.exec_cmd("audio-pick input"), "[Hardware Controls|Audio] select audio input")
-bind(MOD .. " + SHIFT + O", hl.dsp.exec_cmd("caelestia shell audio cycleOutput"), "[Hardware Controls|Audio] cycle audio output")
+bind(
+    MOD .. " + SHIFT + O",
+    hl.dsp.exec_cmd("caelestia shell audio cycleOutput"),
+    "[Hardware Controls|Audio] cycle audio output"
+)
 bind(MOD .. " + U", hl.dsp.exec_cmd("bt-pick"), "[Hardware Controls|Bluetooth] connect or disconnect a device")
 
 --------------------------------------------------------------------------
@@ -224,13 +280,35 @@ bind(MOD .. " + ALT + G", hl.dsp.exec_cmd("caelestia shell gameMode toggle"), "[
 -- Caelestia's picker and notification hand off to `swappy`, which bin/swappy
 -- redirects to satty.
 bind(MOD .. " + P", hl.dsp.exec_cmd("caelestia screenshot -r"), "[Utilities|Screenshot] snip region")
-bind(MOD .. " + CTRL + P", hl.dsp.exec_cmd("caelestia screenshot -r -f"), "[Utilities|Screenshot] freeze and snip region")
-bind(MOD .. " + ALT + P", hl.dsp.exec_cmd("caelestia screenshot"), "[Utilities|Screenshot] print focused monitor", locked)
+bind(
+    MOD .. " + CTRL + P",
+    hl.dsp.exec_cmd("caelestia screenshot -r -f"),
+    "[Utilities|Screenshot] freeze and snip region"
+)
+bind(
+    MOD .. " + ALT + P",
+    hl.dsp.exec_cmd("caelestia screenshot"),
+    "[Utilities|Screenshot] print focused monitor",
+    locked
+)
 bind("Print", hl.dsp.exec_cmd("screenshot all"), "[Utilities|Screenshot] print all monitors", locked)
-bind(MOD .. " + SHIFT + ALT + P", hl.dsp.exec_cmd("screenshot-unblocked s"), "[Utilities|Screenshot] snip ignoring screen-share protection")
-bind(MOD .. " + SHIFT + ALT + M", hl.dsp.exec_cmd("screenshot-unblocked m"), "[Utilities|Screenshot] print monitor ignoring screen-share protection", locked)
+bind(
+    MOD .. " + SHIFT + ALT + P",
+    hl.dsp.exec_cmd("screenshot-unblocked s"),
+    "[Utilities|Screenshot] snip ignoring screen-share protection"
+)
+bind(
+    MOD .. " + SHIFT + ALT + M",
+    hl.dsp.exec_cmd("screenshot-unblocked m"),
+    "[Utilities|Screenshot] print monitor ignoring screen-share protection",
+    locked
+)
 bind(MOD .. " + SHIFT + P", hl.dsp.exec_cmd("hyprpicker -an"), "[Utilities] colour picker to clipboard")
 
-bind(MOD .. " + SHIFT + ALT + S", rules.toggle_screenshare_protection, "[Utilities|Privacy] toggle screen-share protection")
+bind(
+    MOD .. " + SHIFT + ALT + S",
+    rules.toggle_screenshare_protection,
+    "[Utilities|Privacy] toggle screen-share protection"
+)
 
 bind(MOD .. " + ALT + Right", hl.dsp.exec_cmd("caelestia wallpaper -r"), "[Utilities] random wallpaper")

@@ -13,3 +13,6 @@ node_modules/
 config/gtk-3.0/gtk.css
 config/gtk-3.0/thunar.css
 config/gtk-3.0/bookmarks
+
+# tpm installs plugins into the symlinked tmux dir
+config/tmux/plugins/

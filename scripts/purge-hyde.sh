@@ -17,6 +17,7 @@ targets=(
     "${data}/hyde"
     "${data}/hypr"
     "${cfg}/hyde"
+    "${cfg}/uwsm"
     "${cfg}/fish/completions/hyde-shell.fish"
     "${cfg}/zsh/completions/hyde-shell.zsh"
 )

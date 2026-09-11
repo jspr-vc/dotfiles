@@ -46,7 +46,7 @@ The installer never refreshes the package database on its own, so it cannot caus
 2. Smoke test from inside the running session:
    `DOTFILES_SMOKE_TEST=1 Hyprland -c ~/.config/hypr/hyprland.lua`
    A nested window opens. Check `hyprctl configerrors` in it, then close it.
-3. Log out. In SDDM pick the Hyprland session. Hyprland loads `~/.config/hypr/hyprland.lua` on its own.
+3. Log out. In SDDM pick the plain `Hyprland` session, not `Hyprland (uwsm)`. HyDE left a uwsm env file that points `HYPRLAND_CONFIG` at its old config; the purge removes it. Hyprland loads `~/.config/hypr/hyprland.lua` on its own.
 4. Once the new session holds up, `scripts/purge-hyde.sh`. It archives everything it removes.
 
 To roll back before purging: the installer moved the old `~/.config/hypr` to `~/.dotfiles-backup/<timestamp>/.config/hypr`. Remove the symlink, move that directory back, and pick Hyprland in SDDM again. HyDE's files under `~/.local` are untouched until step 4.

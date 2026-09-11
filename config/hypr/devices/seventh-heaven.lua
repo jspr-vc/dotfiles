@@ -12,7 +12,9 @@ hl.monitor({ output = main, mode = "3840x2160@144", position = "1920x0", scale =
 hl.monitor({ output = edge, mode = "2560x720@60", position = "2560x2160", scale = 1 })
 hl.monitor({ output = side, mode = "1920x1080@74.97", position = "0x360", scale = 1 })
 -- Portable monitor, when attached:
--- hl.monitor({ output = "desc:BOE Display 0x00000001", mode = "2560x1440@144", position = "-1440x0", scale = 1, transform = 1 })
+-- hl.monitor({
+--     output = "desc:BOE Display 0x00000001", mode = "2560x1440@144", position = "-1440x0", scale = 1, transform = 1,
+-- })
 
 for i = 1, 5 do
     hl.workspace_rule({ workspace = tostring(i), monitor = main, default = i == 1 })
