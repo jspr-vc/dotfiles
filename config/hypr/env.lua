@@ -30,8 +30,10 @@ hl.env("SSH_AUTH_SOCK", util.home .. "/.1password/agent.sock")
 -- Aquamarine renders on the kernel's boot_vga GPU. On a cold boot with no
 -- UEFI framebuffer that can be a GPU with nothing plugged in, so lead with
 -- the one that has monitors. See docs/adr/0003.
-local cards = gpu.cards_by_connected_outputs()
-if #cards > 1 then
+-- Only when the kernel got it wrong: naming the cards ourselves also pins
+-- the secondaries, which is worse than the default when the kernel is right.
+local cards, overrules_kernel = gpu.cards_by_connected_outputs()
+if #cards > 1 and overrules_kernel then
     hl.env("AQ_DRM_DEVICES", table.concat(cards, ":"))
 end
 

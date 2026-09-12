@@ -41,24 +41,45 @@ done
 
 mapfile -t cards < <(scan | sort -k3,3nr -k2,2nr -k1,1)
 
-if [ "${#cards[@]}" -le 1 ]; then
+# A Device section is not free. When one exists, Xorg reuses the first
+# section matching a driver for every GPU it auto-adds as a secondary
+# screen, so a "modesetting" section written for an AMD card is also
+# applied to an NVIDIA card that would otherwise get Driver "nvidia" from
+# its OutputClass; modesetting then fails to create a pixmap on it and the
+# whole server dies with "failed to create screen resources" and no
+# greeter. So write the file only when it changes the outcome, and leave
+# Xorg's own autoconfiguration alone when it already lands correctly.
+unpin() {
     if [ -f "$conf" ]; then
         rm -f "$conf"
-        log "one GPU, removed $conf"
+        log "$1, removed $conf"
     else
-        log "one GPU, nothing to pin"
+        log "$1, nothing to pin"
     fi
     exit 0
+}
+
+if [ "${#cards[@]}" -le 1 ]; then
+    unpin "one GPU"
 fi
 
 read -r name boot_vga connected pci driver <<<"${cards[0]}"
 
+# Cannot tell where the monitors are, so do not overrule an earlier boot
+# that could.
 if [ "$connected" -eq 0 ]; then
     if [ -f "$conf" ]; then
         log "no monitor detected on any GPU, keeping $conf"
         exit 0
     fi
-    log "no monitor detected on any GPU, falling back to boot_vga ($name)"
+    log "no monitor detected on any GPU, nothing to pin"
+    exit 0
+fi
+
+# The kernel already agrees with where the monitors are: autoconfiguration
+# picks this card on its own and handles the other GPUs better than we can.
+if [ "$boot_vga" -eq 1 ]; then
+    unpin "$name ($pci, $driver) has the monitors and is already boot_vga"
 fi
 
 # 0000:03:00.0 -> PCI:3@0:0:0 (Xorg wants decimal bus@domain:slot:function)

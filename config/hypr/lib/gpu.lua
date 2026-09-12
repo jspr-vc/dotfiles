@@ -7,6 +7,8 @@ local M = {}
 --- Ties go to the kernel's boot_vga card, then the lower card number. One
 --- `ls` spawn for the listing; everything else is a sysfs read.
 ---@return string[] paths under /dev/dri, primary first
+---@return boolean true when the primary is not the kernel's boot_vga card,
+--- i.e. when saying so overrules the kernel rather than repeating it
 function M.cards_by_connected_outputs()
     local ok, pipe = pcall(io.popen, "ls -1 /sys/class/drm 2>/dev/null")
     if not ok or not pipe then
@@ -63,7 +65,7 @@ function M.cards_by_connected_outputs()
     for i, c in ipairs(ordered) do
         paths[i] = "/dev/dri/" .. c.name
     end
-    return paths
+    return paths, #ordered > 0 and ordered[1].boot_vga == 0
 end
 
 return M
