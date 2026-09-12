@@ -17,6 +17,7 @@ config/      symlinked to ~/.config/<name>
 bin/         symlinked to ~/.local/bin: audio-pick bt-pick win-pick keys-hint idle-suspend screenshot screenshot-unblocked swappy (satty shim) sddm-sync
 home/        symlinked to ~ (.zshenv)
 sddm/        the login theme, copied to /usr/share/sddm/themes/caelestia
+system/      root-installed helpers: xorg-primary-gpu and its unit, copied by install/gpu.sh
 packages/    desktop.ts, apps.ts, <hostname>.ts: typed { group: { package: "reason" } }
 install/     one file per install step
 scripts/     purge-hyde.sh
@@ -39,6 +40,7 @@ Anything the symlinks displace goes to `~/.dotfiles-backup/<timestamp>/`.
 The installer never refreshes the package database on its own, so it cannot cause a partial upgrade. If a download 404s because the database is stale, run `sudo pacman -Syu` yourself and rerun the step.
 
 `gpu` edits `/etc/mkinitcpio.conf` and rebuilds the initramfs when it changes something. Reboot after.
+It also installs `xorg-primary-gpu.service`, which pins SDDM's Xorg to the GPU that has monitors attached on every boot (docs/adr/0003).
 
 ## Cutover from HyDE
 

@@ -1,4 +1,5 @@
 local util = require("lib.util")
+local gpu = require("lib.gpu")
 
 local cursor_theme = "Bibata-Modern-Ice"
 local cursor_size = 24
@@ -25,6 +26,14 @@ hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 
 hl.env("SSH_AUTH_SOCK", util.home .. "/.1password/agent.sock")
+
+-- Aquamarine renders on the kernel's boot_vga GPU. On a cold boot with no
+-- UEFI framebuffer that can be a GPU with nothing plugged in, so lead with
+-- the one that has monitors. See docs/adr/0003.
+local cards = gpu.cards_by_connected_outputs()
+if #cards > 1 then
+    hl.env("AQ_DRM_DEVICES", table.concat(cards, ":"))
+end
 
 -- The login session's PATH has no user bins; every bind that calls bin/
 -- and the swappy shim depend on this.

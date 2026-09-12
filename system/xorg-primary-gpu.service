@@ -1,0 +1,11 @@
+[Unit]
+Description=Pin Xorg to the GPU with monitors attached
+Documentation=file:///usr/local/bin/xorg-primary-gpu
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/xorg-primary-gpu
+
+[Install]
+WantedBy=graphical.target

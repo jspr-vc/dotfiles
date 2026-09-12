@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# Pin Xorg's screen to the GPU that has monitors attached.
+#
+# Xorg puts its screen on the GPU the kernel flagged boot_vga. On a cold boot
+# where UEFI brings up no framebuffer, the kernel hands that flag to an
+# integrated GPU even with nothing plugged into it, and the SDDM greeter
+# renders into a 320x200 screen nobody can see. Nothing here names a PCI
+# address: the choice is made from sysfs on every boot.
+# See docs/adr/0003-primary-gpu-by-connected-outputs.md.
+#
+# Runs as root from xorg-primary-gpu.service before the display manager, and
+# once from install/gpu.sh. Prints one line saying what it did.
+set -euo pipefail
+
+conf=/etc/X11/xorg.conf.d/10-primary-gpu.conf
+tag="$(basename "$0")"
+
+log() { printf '%s: %s\n' "$tag" "$*"; }
+
+# One "name boot_vga connected pci driver" line per card node.
+scan() {
+    local card name pci driver boot_vga connected
+    for card in /sys/class/drm/card*; do
+        case "$card" in *-*) continue ;; esac
+        [ -e "$card/device" ] || continue
+        name=${card##*/}
+        pci=$(basename "$(readlink -f "$card/device")")
+        driver=$(basename "$(readlink -f "$card/device/driver" 2>/dev/null || echo unknown)")
+        boot_vga=$(cat "$card/device/boot_vga" 2>/dev/null || echo 0)
+        connected=$(grep -lsx connected "$card"-*/status | wc -l || true)
+        printf '%s %s %s %s %s\n' "$name" "$boot_vga" "$connected" "$pci" "$driver"
+    done
+}
+
+# Connectors report their state a moment after the driver binds. Give the
+# scan a few seconds to see at least one monitor before deciding.
+for _ in $(seq 1 25); do
+    grep -qsx connected /sys/class/drm/card*-*/status && break
+    sleep 0.2
+done
+
+mapfile -t cards < <(scan | sort -k3,3nr -k2,2nr -k1,1)
+
+if [ "${#cards[@]}" -le 1 ]; then
+    if [ -f "$conf" ]; then
+        rm -f "$conf"
+        log "one GPU, removed $conf"
+    else
+        log "one GPU, nothing to pin"
+    fi
+    exit 0
+fi
+
+read -r name boot_vga connected pci driver <<<"${cards[0]}"
+
+if [ "$connected" -eq 0 ]; then
+    if [ -f "$conf" ]; then
+        log "no monitor detected on any GPU, keeping $conf"
+        exit 0
+    fi
+    log "no monitor detected on any GPU, falling back to boot_vga ($name)"
+fi
+
+# 0000:03:00.0 -> PCI:3@0:0:0 (Xorg wants decimal bus@domain:slot:function)
+domain=${pci%%:*}
+rest=${pci#*:}
+bus=${rest%%:*}
+slotfunc=${rest#*:}
+slot=${slotfunc%.*}
+func=${slotfunc#*.}
+busid=$(printf 'PCI:%d@%d:%d:%d' "0x$bus" "0x$domain" "0x$slot" "0x$func")
+
+case "$driver" in
+    nvidia) xdriver=nvidia ;;
+    *) xdriver=modesetting ;;
+esac
+
+content=$(
+    cat <<CONF
+# Written by xorg-primary-gpu at boot; edits are overwritten.
+# Screen 0 on $pci ($driver): the GPU with monitors attached, $connected connected.
+Section "Device"
+    Identifier "PrimaryGPU"
+    Driver     "$xdriver"
+    BusID      "$busid"
+EndSection
+
+Section "Screen"
+    Identifier "PrimaryScreen"
+    Device     "PrimaryGPU"
+EndSection
+
+Section "ServerLayout"
+    Identifier "PrimaryLayout"
+    Screen     0 "PrimaryScreen"
+EndSection
+CONF
+)
+
+if [ -f "$conf" ] && [ "$(cat "$conf")" = "$content" ]; then
+    log "$name ($pci, $driver) already pinned, $connected connected"
+    exit 0
+fi
+
+mkdir -p "$(dirname "$conf")"
+printf '%s\n' "$content" >"$conf.tmp"
+mv -f "$conf.tmp" "$conf"
+log "pinned X to $name ($pci, $driver), $connected connected, boot_vga=$boot_vga"

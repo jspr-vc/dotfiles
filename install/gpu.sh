@@ -13,8 +13,10 @@
 
 step "gpu"
 
-has_amd() { lspci | grep -qE '(VGA|3D|Display).*AMD/ATI'; }
-has_nvidia() { lspci | grep -qE '(VGA|3D|Display).*NVIDIA'; }
+# Not grep -q: it exits on the first match, lspci dies of SIGPIPE, and under
+# pipefail the pipeline reports failure.
+has_amd() { lspci | grep -E '(VGA|3D|Display).*AMD/ATI' >/dev/null; }
+has_nvidia() { lspci | grep -E '(VGA|3D|Display).*NVIDIA' >/dev/null; }
 
 rebuild_initramfs=0
 
@@ -56,7 +58,7 @@ elif has_amd && has_nvidia; then
             info "[HYBRID] adding amdgpu + nvidia* to mkinitcpio MODULES"
             sudo sed -i 's|^MODULES=()|MODULES=(amdgpu nvidia nvidia_modeset nvidia_uvm nvidia_drm)|' /etc/mkinitcpio.conf
             rebuild_initramfs=1
-        elif grep '^MODULES=' /etc/mkinitcpio.conf | grep -qv 'nvidia'; then
+        elif grep '^MODULES=' /etc/mkinitcpio.conf | grep -v 'nvidia' >/dev/null; then
             warn "[HYBRID] /etc/mkinitcpio.conf MODULES is non-default and missing nvidia entries"
             warn "[HYBRID] add by hand: amdgpu nvidia nvidia_modeset nvidia_uvm nvidia_drm"
             grep '^MODULES=' /etc/mkinitcpio.conf
@@ -94,6 +96,21 @@ if [ "$rebuild_initramfs" -eq 1 ]; then
     info "reboot recommended"
 fi
 
+# Xorg opens its screen on the GPU the kernel flagged boot_vga, which on a
+# cold boot with no UEFI framebuffer can be a GPU with nothing plugged in.
+# Pin it to the GPU that has monitors, at every boot and once now.
+# See docs/adr/0003-primary-gpu-by-connected-outputs.md.
+sudo install -m 755 "${DOTFILES}/system/xorg-primary-gpu" /usr/local/bin/xorg-primary-gpu
+sudo install -m 644 "${DOTFILES}/system/xorg-primary-gpu.service" /etc/systemd/system/xorg-primary-gpu.service
+sudo systemctl daemon-reload
+if systemctl is-enabled xorg-primary-gpu.service &>/dev/null; then
+    info "xorg-primary-gpu.service already enabled"
+else
+    sudo systemctl enable xorg-primary-gpu.service
+    info "enabled xorg-primary-gpu.service"
+fi
+sudo /usr/local/bin/xorg-primary-gpu
+
 # Hyprland plugins. hyprgrass drives the Xeneon Edge touch strip on the
 # desktop only. It fails to build against some Hyprland releases, so a
 # failure here is a warning, not an error: the config guards on the plugin
@@ -103,7 +120,7 @@ if [ "$(hostname_short)" = "seventh-heaven" ] && command -v hyprpm &>/dev/null; 
     if ! hyprpm update -n; then
         warn "hyprpm update failed, skipping plugins"
     else
-        if hyprpm list 2>/dev/null | grep -q hyprgrass; then
+        if hyprpm list 2>/dev/null | grep hyprgrass >/dev/null; then
             info "hyprgrass already added"
         else
             hyprpm add https://github.com/horriblename/hyprgrass || warn "hyprgrass build failed"

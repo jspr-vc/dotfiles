@@ -5,9 +5,9 @@ local main = "desc:LG Electronics LG ULTRAGEAR+ 512NTKFF2261"
 local edge = "desc:Cyrix Corporation XENEON EDGE 040625415656"
 local side = "desc:Samsung Electric Company S24R35x H4TN901181"
 
--- 4K@144 leaves DP 1.4 bandwidth headroom and avoids DSC link-training
--- failures that caused intermittent black screens on cold boot. Try @165
--- again once cable, monitor and driver prove stable together.
+-- 4K@144 leaves DP 1.4 bandwidth headroom without DSC. The cold-boot black
+-- screens once blamed on link training were the boot_vga problem, see
+-- docs/adr/0003. Try @165 again once cable, monitor and driver prove stable.
 hl.monitor({ output = main, mode = "3840x2160@144", position = "1920x0", scale = 1, transform = 0 })
 hl.monitor({ output = edge, mode = "2560x720@60", position = "2560x2160", scale = 1 })
 hl.monitor({ output = side, mode = "1920x1080@74.97", position = "0x360", scale = 1 })
