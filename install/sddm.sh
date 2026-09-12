@@ -12,17 +12,10 @@ sudo chown -R "${USER}:${USER}" "$theme_dir"
 info "theme copied to $theme_dir"
 
 # sddm reads conf.d/*.conf alphabetically and the last file wins.
-# kde_settings.conf (Current=Candy, from HyDE) has to lose to this one.
+# Anything else setting [Theme] Current, like kde_settings.conf, has to lose to this one.
 sudo mkdir -p /etc/sddm.conf.d
 printf '[Theme]\nCurrent=caelestia\n' | sudo tee /etc/sddm.conf.d/zz-caelestia.conf >/dev/null
 info "wrote /etc/sddm.conf.d/zz-caelestia.conf"
-
-for f in /etc/sddm.conf.d/the_hyde_project.conf /etc/sddm.conf.d/backup_the_hyde_project.conf; do
-    if [ -f "$f" ]; then
-        sudo rm -f "$f"
-        info "removed $f"
-    fi
-done
 
 if [ -f "${HOME}/.local/state/caelestia/scheme.json" ]; then
     "${DOTFILES}/bin/sddm-sync"

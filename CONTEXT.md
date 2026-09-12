@@ -16,4 +16,3 @@ Personal Hyprland desktop for Arch. Hyprland is configured in Lua. Caelestia is 
 - **Screen-share protection**: a named group of windows hidden from screen capture. Toggled as a group. Off state survives a config reload, never a compositor restart.
 - **Login screen**: the SDDM theme. Centred prompt, follows the scheme and the current wallpaper.
 - **Install**: the one-command bring-up of a fresh Arch machine to this desktop. Every step is safe to run again.
-- **Purge**: the separate, explicit removal of HyDE from a machine after the new desktop is verified.

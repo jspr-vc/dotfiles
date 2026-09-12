@@ -20,7 +20,6 @@ sddm/        the login theme, copied to /usr/share/sddm/themes/caelestia
 system/      root-installed helpers: xorg-primary-gpu and its unit, copied by install/gpu.sh
 packages/    desktop.ts, apps.ts, <hostname>.ts: typed { group: { package: "reason" } }
 install/     one file per install step
-scripts/     purge-hyde.sh
 docs/adr/    decisions worth remembering
 CONTEXT.md   glossary
 ```
@@ -42,21 +41,12 @@ The installer never refreshes the package database on its own, so it cannot caus
 `gpu` edits `/etc/mkinitcpio.conf` and rebuilds the initramfs when it changes something. Reboot after.
 It also installs `xorg-primary-gpu.service`, which pins SDDM's Xorg to the GPU that has monitors attached on every boot (docs/adr/0003).
 
-## Cutover from HyDE
-
-1. Run `./install.sh` with HyDE still on disk.
-2. Smoke test from inside the running session:
-   `DOTFILES_SMOKE_TEST=1 Hyprland -c ~/.config/hypr/hyprland.lua`
-   A nested window opens. Check `hyprctl configerrors` in it, then close it.
-3. Log out. In SDDM pick the plain `Hyprland` session, not `Hyprland (uwsm)`. HyDE left a uwsm env file that points `HYPRLAND_CONFIG` at its old config; the purge removes it. Hyprland loads `~/.config/hypr/hyprland.lua` on its own.
-4. Once the new session holds up, `scripts/purge-hyde.sh`. It archives everything it removes.
-
-To roll back before purging: the installer moved the old `~/.config/hypr` to `~/.dotfiles-backup/<timestamp>/.config/hypr`. Remove the symlink, move that directory back, and pick Hyprland in SDDM again. HyDE's files under `~/.local` are untouched until step 4.
-
 ## Checks
 
 `./check.sh` runs stylua, luacheck, shellcheck and `luac -p`. Linters that are not installed are skipped with a warning.
 It also warns, without failing, when an AUR package that depends on `qt6-base` (quickshell, so Caelestia) was built before the installed Qt and needs `yay -S --rebuild`.
 Hook it up with `ln -s ../../check.sh .git/hooks/pre-commit`.
+
+To smoke test the Hyprland config from inside a running session, `DOTFILES_SMOKE_TEST=1 Hyprland -c ~/.config/hypr/hyprland.lua` opens a nested window. Check `hyprctl configerrors` in it, then close it.
 
 The Lua LSP reads `/usr/share/hypr/stubs` through `.luarc.json`.

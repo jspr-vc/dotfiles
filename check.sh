@@ -14,7 +14,7 @@ run() {
 }
 
 mapfile -t lua_files < <(find config/hypr -name '*.lua' -not -path '*/scheme/current.lua' | sort)
-mapfile -t sh_files < <(find bin install scripts system -type f -print 2>/dev/null | sort; printf '%s\n' install.sh check.sh)
+mapfile -t sh_files < <(find bin install system -type f -print 2>/dev/null | sort; printf '%s\n' install.sh check.sh)
 
 if have luac; then
     run "luac -p" luac -p "${lua_files[@]}"
