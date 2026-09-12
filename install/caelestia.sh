@@ -33,3 +33,15 @@ Exec = /bin/sh -c "cp -r ${schemes_src}/. ${schemes_dst}/"
 HOOK
 info "pacman hook written to $hook"
 fi
+
+# User templates (config/caelestia/templates) render into
+# ~/.local/state/caelestia/theme only on a scheme change, and configs such as
+# ghostty's point straight at the rendered files. Re-apply the current scheme
+# so a fresh machine, or a template added since the last change, has them.
+# Any scheme argument triggers the apply; the current mode changes nothing.
+# Runs after dotfiles (templates linked) and sddm (the postHook's theme dir).
+if caelestia scheme set -m "$(caelestia scheme get -m)" >/dev/null; then
+    info "scheme re-applied, templates rendered"
+else
+    warn "caelestia scheme apply failed; run 'caelestia scheme set -m dark' by hand"
+fi
