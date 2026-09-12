@@ -18,15 +18,18 @@ Item {
         return v.charAt(0) === "#" ? v : "#" + v
     }
 
+    // Foreground tokens are "ink", not Material's on*: QML reads a property
+    // named onSurface next to a property surface as a signal handler, and the
+    // colour silently stays black.
     readonly property color primary: hex("Primary", "c2c1ff")
-    readonly property color onPrimary: hex("OnPrimary", "2a2a60")
+    readonly property color primaryInk: hex("OnPrimary", "2a2a60")
     readonly property color primaryContainer: hex("PrimaryContainer", "7171ac")
-    readonly property color onPrimaryContainer: hex("OnPrimaryContainer", "ffffff")
+    readonly property color primaryContainerInk: hex("OnPrimaryContainer", "ffffff")
     readonly property color surface: hex("Surface", "131317")
-    readonly property color onSurface: hex("OnSurface", "e5e1e7")
+    readonly property color surfaceInk: hex("OnSurface", "e5e1e7")
     readonly property color surfaceContainer: hex("SurfaceContainer", "201f23")
     readonly property color surfaceContainerHigh: hex("SurfaceContainerHigh", "2a292e")
-    readonly property color onSurfaceVariant: hex("OnSurfaceVariant", "c8c5d1")
+    readonly property color surfaceVariantInk: hex("OnSurfaceVariant", "c8c5d1")
     readonly property color outline: hex("Outline", "918f9a")
     readonly property color outlineVariant: hex("OutlineVariant", "47464f")
     readonly property color error: hex("Error", "ffb4ab")
@@ -82,7 +85,7 @@ Item {
             font.family: root.fontFamily
             font.pixelSize: 120 * root.scale
             font.weight: Font.Bold
-            color: root.onSurface
+            color: root.surfaceInk
             renderType: Text.NativeRendering
         }
 
@@ -91,7 +94,7 @@ Item {
             text: Qt.formatDate(root.now, root.dateFormat)
             font.family: root.fontFamily
             font.pixelSize: 22 * root.scale
-            color: root.onSurfaceVariant
+            color: root.surfaceVariantInk
             renderType: Text.NativeRendering
         }
 
@@ -116,7 +119,7 @@ Item {
                     font.family: root.fontFamily
                     font.pixelSize: parent.width * 0.45
                     font.weight: Font.Bold
-                    color: root.onPrimaryContainer
+                    color: root.primaryContainerInk
                     renderType: Text.NativeRendering
                 }
             }
@@ -165,7 +168,7 @@ Item {
             font.family: root.fontFamily
             font.pixelSize: 18 * root.scale
             font.weight: Font.Medium
-            color: root.onSurface
+            color: root.surfaceInk
             placeholderText: "Username"
             placeholderTextColor: root.outline
             selectByMouse: true
@@ -190,12 +193,12 @@ Item {
             horizontalAlignment: TextInput.AlignHCenter
             font.family: root.fontFamily
             font.pixelSize: 18 * root.scale
-            color: root.onSurface
+            color: root.surfaceInk
             placeholderText: "Password"
             placeholderTextColor: root.outline
             selectByMouse: true
             selectionColor: root.primary
-            selectedTextColor: root.onPrimary
+            selectedTextColor: root.primaryInk
 
             background: Rectangle {
                 id: passwordBg
@@ -248,7 +251,7 @@ Item {
             contentItem: Text {
                 text: session.displayText
                 font: session.font
-                color: root.onSurfaceVariant
+                color: root.surfaceVariantInk
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 elide: Text.ElideRight
@@ -261,7 +264,7 @@ Item {
                 text: "expand_more"
                 font.family: "Material Symbols Rounded"
                 font.pixelSize: 18 * root.scale
-                color: root.onSurfaceVariant
+                color: root.surfaceVariantInk
             }
 
             background: Rectangle {
@@ -281,7 +284,7 @@ Item {
                 contentItem: Text {
                     text: sessionItem.name
                     font: session.font
-                    color: sessionItem.highlighted ? root.onPrimaryContainer : root.onSurface
+                    color: sessionItem.highlighted ? root.primaryContainerInk : root.surfaceInk
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                     elide: Text.ElideRight
@@ -326,7 +329,7 @@ Item {
             glyph: "bedtime"
             diameter: 52 * root.scale
             fill: root.surfaceContainerHigh
-            ink: root.onSurfaceVariant
+            ink: root.surfaceVariantInk
             visible: sddm.canSuspend
             onClicked: sddm.suspend()
         }
@@ -335,7 +338,7 @@ Item {
             glyph: "restart_alt"
             diameter: 52 * root.scale
             fill: root.surfaceContainerHigh
-            ink: root.onSurfaceVariant
+            ink: root.surfaceVariantInk
             visible: sddm.canReboot
             onClicked: sddm.reboot()
         }
@@ -344,7 +347,7 @@ Item {
             glyph: "power_settings_new"
             diameter: 52 * root.scale
             fill: root.primaryContainer
-            ink: root.onPrimaryContainer
+            ink: root.primaryContainerInk
             visible: sddm.canPowerOff
             onClicked: sddm.powerOff()
         }
