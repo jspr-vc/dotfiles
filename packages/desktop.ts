@@ -20,6 +20,7 @@ export default {
     meson: "hyprpm builds plugins from source",
     cpio: "hyprpm builds plugins from source",
     pkgconf: "hyprpm builds plugins from source",
+    glm: "hyprgrass (via its wf-touch subproject) needs it to build",
     gcc: "hyprpm builds plugins from source",
     git: "hyprpm clones plugins, the AUR helper clones packages",
   },
