@@ -1,7 +1,9 @@
 -- ASUS ROG Flow X13: AMD iGPU + NVIDIA dGPU, 2560x1600 165Hz touch panel.
 local panel = "desc:Thermotrex Corporation TL134ADXP01-0"
 
-hl.monitor({ output = "eDP-1", mode = "2560x1600@165", position = "0x0", scale = 1, transform = 0, vrr = 1 })
+-- By description: the connector name is not stable, it has been both eDP-1
+-- and eDP-2.
+hl.monitor({ output = panel, mode = "2560x1600@165", position = "0x0", scale = 1, transform = 0, vrr = 1 })
 hl.monitor({ output = "HDMI-A-2", mode = "1920x1080@60", position = "0x-1080", scale = 1, transform = 0 })
 
 local external = "HDMI-A-2"
