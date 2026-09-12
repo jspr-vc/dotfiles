@@ -162,7 +162,8 @@ end)
 
 hl.workspace_rule({
     workspace = "special:ai",
-    on_created_empty = "[float; center; size monitor_w*0.5 monitor_h*0.8; no_blur; animation slide top; no_screen_share; opaque] "
+    on_created_empty = "[float; center; size monitor_w*0.5 monitor_h*0.8; "
+        .. "no_blur; animation slide top; no_screen_share; opaque] "
         .. "ghostty -e opencode",
 })
 hl.workspace_rule({ workspace = "special:special", gaps_out = 100 })
