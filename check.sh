@@ -52,4 +52,25 @@ else
     warn "bun not installed, skipping package name check (install/bootstrap.sh)"
 fi
 
+# AUR packages built against Qt's private API (quickshell, so Caelestia) stop
+# loading after any qt6-base update until rebuilt. This inspects the machine,
+# not the repo, so it warns without failing the hook.
+if have pacman; then
+    db=/var/lib/pacman/local
+    installed_at() { awk '/^%INSTALLDATE%$/ { getline; print; exit }' "$db/$1/desc"; }
+    qt=$(pacman -Q qt6-base 2>/dev/null | tr ' ' '-')
+    if [ -n "$qt" ]; then
+        qt_date=$(installed_at "$qt")
+        stale=()
+        while read -r pkg ver; do
+            desc="$db/$pkg-$ver/desc"
+            awk '/^%DEPENDS%$/ { d = 1; next } /^$/ { d = 0 } d' "$desc" | grep -qE '^qt6-base([<>=]|$)' || continue
+            [ "$(installed_at "$pkg-$ver")" -lt "$qt_date" ] && stale+=("$pkg")
+        done < <(pacman -Qm)
+        if [ ${#stale[@]} -gt 0 ]; then
+            warn "built before the current ${qt}, rebuild: yay -S --rebuild ${stale[*]}"
+        fi
+    fi
+fi
+
 exit $status

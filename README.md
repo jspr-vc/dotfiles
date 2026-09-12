@@ -56,6 +56,7 @@ To roll back before purging: the installer moved the old `~/.config/hypr` to `~/
 ## Checks
 
 `./check.sh` runs stylua, luacheck, shellcheck and `luac -p`. Linters that are not installed are skipped with a warning.
+It also warns, without failing, when an AUR package that depends on `qt6-base` (quickshell, so Caelestia) was built before the installed Qt and needs `yay -S --rebuild`.
 Hook it up with `ln -s ../../check.sh .git/hooks/pre-commit`.
 
 The Lua LSP reads `/usr/share/hypr/stubs` through `.luarc.json`.
