@@ -6,6 +6,8 @@ local M = {}
 -- Window rules
 --------------------------------------------------------------------------
 
+hl.window_rule({ name = "fullscreen-idle-inhibit", match = { class = ".*" }, idle_inhibit = "fullscreen" })
+
 -- Floating windows open centred, except XWayland popups which position themselves.
 hl.window_rule({ name = "center-floating", match = { float = true, xwayland = false }, center = true })
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Suspend from hypridle, unless something is playing audio.
+# Suspend on idle, unless something is playing audio.
 
 set -euo pipefail
 

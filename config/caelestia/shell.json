@@ -401,20 +401,27 @@
             "lockBeforeSleep": true,
             "timeouts": [
                 {
-                    "idleAction": "lock",
-                    "timeout": 180
+                    "idleAction": [
+                        "brightnessctl",
+                        "-s",
+                        "set",
+                        "1%"
+                    ],
+                    "returnAction": [
+                        "brightnessctl",
+                        "-r"
+                    ],
+                    "timeout": 60
                 },
                 {
-                    "idleAction": "dpms off",
-                    "returnAction": "dpms on",
-                    "timeout": 300
+                    "idleAction": "lock",
+                    "timeout": 120
                 },
                 {
                     "idleAction": [
-                        "systemctl",
-                        "suspend-then-hibernate"
+                        "idle-suspend"
                     ],
-                    "timeout": 600
+                    "timeout": 300
                 }
             ]
         },

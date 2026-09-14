@@ -6,7 +6,6 @@ export default {
     hyprland: "the compositor, Lua config in config/hypr",
     "xdg-desktop-portal-hyprland": "screen sharing and the window picker for apps that ask the portal",
     "xdg-desktop-portal-gtk": "file chooser and settings portal for GTK apps",
-    hypridle: "idle timeouts: dim, lock, suspend (config/hypr/hypridle.conf)",
     hyprsunset: "night light, profiles in config/hypr/hyprsunset.conf",
     hyprpicker: "colour picker on SUPER+SHIFT+P",
     "hyprland-qt-support": "QML styling shared by the hypr ecosystem tools",
@@ -45,7 +44,7 @@ export default {
     networkmanager: "networking, shown in the caelestia bar",
     "power-profiles-daemon": "power profiles switched from the caelestia bar",
     playerctl: "media keys in binds.lua",
-    brightnessctl: "brightness keys and the hypridle dim step",
+    brightnessctl: "brightness keys and the idle dim step",
   },
 
   clipboardScreenshot: {

@@ -25,7 +25,6 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-clip-persist --clipboard regular")
 
     -- Daemons
-    hl.exec_cmd("hypridle")
     hl.exec_cmd("hyprsunset")
     hl.exec_cmd("udiskie --no-automount --smart-tray")
     hl.exec_cmd("xsettingsd")
