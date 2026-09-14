@@ -16,8 +16,8 @@ hl.config({
             enabled = true,
             respect_gaps = true,
             border_overlap = true,
-            window_gap = 1,
-            monitor_gap = 1,
+            window_gap = 20,
+            monitor_gap = 20,
         },
     },
 
