@@ -115,6 +115,8 @@ alias killwkeys='pkill wshowkeys'
 alias xedge_on='hyprctl dispatch "hl.dsp.dpms({ action = \"on\", monitor = \"HDMI-A-1\" })"'
 alias xedge_off='hyprctl dispatch "hl.dsp.dpms({ action = \"off\", monitor = \"HDMI-A-1\" })"'
 alias mv_stl='mv --verbose --force ~/Downloads/*.{stl,3mf} ~/Documents/3d\ prints/'
+alias dot='cd ~/dotfiles && nvim .'
+alias dotc='cd ~/dotfiles && claude --model opus'
 
 # Machine-local additions
 [[ -r "$ZDOTDIR/user.zsh" ]] && source "$ZDOTDIR/user.zsh"
