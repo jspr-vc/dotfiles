@@ -562,9 +562,9 @@
             },
             {
                 "command": [
-                    "loginctl",
-                    "terminate-user",
-                    ""
+                    "hyprctl",
+                    "dispatch",
+                    "hl.dsp.exit()"
                 ],
                 "dangerous": true,
                 "description": "Log out of the current session",
@@ -681,9 +681,9 @@
                 "hibernate"
             ],
             "logout": [
-                "loginctl",
-                "terminate-user",
-                ""
+                "hyprctl",
+                "dispatch",
+                "hl.dsp.exit()"
             ],
             "reboot": [
                 "systemctl",
