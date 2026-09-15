@@ -764,7 +764,7 @@
             "vpnChanged": true
         },
         "vpn": {
-            "enabled": false,
+            "enabled": true,
             "provider": [
                 {
                     "connectCmd": [
