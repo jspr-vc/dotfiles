@@ -2,7 +2,7 @@
 
 add_newline = true
 format = """
-$directory$git_branch$git_status$python$nodejs$cmd_duration
+$directory$git_branch$git_status$cmd_duration
 $character"""
 
 [directory]
@@ -12,26 +12,12 @@ style = "bold blue"
 
 [git_branch]
 format = "[$symbol$branch]($style) "
-symbol = " "
+symbol = " "
 style = "purple"
 
 [git_status]
 format = "([$all_status$ahead_behind]($style) )"
 style = "yellow"
-
-[python]
-format = "[$symbol$version( \\($virtualenv\\))]($style) "
-symbol = " "
-style = "green"
-detect_extensions = []
-detect_files = ["pyproject.toml", "requirements.txt", ".python-version", "Pipfile"]
-
-[nodejs]
-format = "[$symbol$version]($style) "
-symbol = " "
-style = "green"
-detect_extensions = []
-detect_files = ["package.json", ".node-version", ".nvmrc"]
 
 [cmd_duration]
 min_time = 2000
