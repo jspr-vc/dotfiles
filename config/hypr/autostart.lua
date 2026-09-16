@@ -32,4 +32,6 @@ hl.on("hyprland.start", function()
 
     -- Shell
     hl.exec_cmd("caelestia shell -d")
+
+    hl.exec_cmd("dotfiles-check")
 end)

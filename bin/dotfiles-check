@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Toast if ~/dotfiles is behind its remote. Fetches over HTTPS so it works
+# without the SSH agent (1Password) being unlocked.
+
+set -euo pipefail
+
+repo="${DOTFILES:-${HOME}/dotfiles}"
+cd "$repo"
+
+nm-online -q -t 60 || exit 0
+
+branch=$(git symbolic-ref --short HEAD)
+url=$(git remote get-url origin | sed -E 's#^(ssh://)?git@github\.com[:/]#https://github.com/#')
+
+GIT_TERMINAL_PROMPT=0 git -c credential.helper= fetch -q "$url" \
+    "+refs/heads/${branch}:refs/remotes/origin/${branch}"
+
+behind=$(git rev-list --count "HEAD..origin/${branch}")
+[ "$behind" -gt 0 ] || exit 0
+
+sleep 5
+caelestia shell toaster warn "Dotfiles outdated" \
+    "${behind} commit(s) behind origin/${branch}" "sync" >/dev/null 2>&1 || true
