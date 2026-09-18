@@ -369,7 +369,8 @@
                 "vlc"
             ],
             "terminal": [
-                "ghostty"
+                "ghostty",
+                "-e"
             ]
         },
         "battery": {
@@ -773,7 +774,7 @@
             "vpnChanged": true
         },
         "vpn": {
-            "enabled": false,
+            "enabled": true,
             "provider": [
                 {
                     "connectCmd": [
