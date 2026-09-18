@@ -1,6 +1,6 @@
 {
   "theme": {
     "iconTheme": "Tela-circle-dracula",
-    "postHook": "$HOME/.local/bin/sddm-sync"
+    "postHook": "$HOME/.local/bin/qt-sync; $HOME/.local/bin/sddm-sync"
   }
 }

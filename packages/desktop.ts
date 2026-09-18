@@ -28,6 +28,7 @@ export default {
     "caelestia-shell": "the desktop shell: bar, launcher, notifications, lock, session, OSD",
     "caelestia-cli": "caelestia command: scheme, wallpaper, screenshot, clipboard, emoji, shell IPC",
     qtengine: "Qt platform theme that caelestia colours (QT_QPA_PLATFORMTHEME in env.lua)",
+    "darkly-bin": "Qt widget style qtengine asks for, so Dolphin and other Qt apps match caelestia",
     fuzzel: "dmenu backend for audio-pick, bt-pick, win-pick, keys-hint; themed by caelestia",
     sddm: "login screen, theme in sddm/caelestia",
     "qt6-svg": "SVG icons for the SDDM theme",

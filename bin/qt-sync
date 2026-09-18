@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Caelestia scheme hook: Caelestia paints Qt selections in solid primary with
+# onPrimary text, but Dolphin keeps its normal text colour on selected rows
+# under any style but Breeze, which leaves light text on a light highlight.
+# Swap the selection to secondaryContainer, the colour the shell uses for
+# selected items, which reads with both text colours.
+
+set -euo pipefail
+
+scheme_file="${XDG_CONFIG_HOME:-$HOME/.config}/qtengine/caelestia.colors"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/caelestia"
+
+[ -f "$scheme_file" ] || exit 0
+
+colours="${SCHEME_COLOURS:-$(jq -c '.colours' "$state_dir/scheme.json")}"
+bg="#$(jq -r '.secondaryContainer' <<<"$colours")"
+fg="#$(jq -r '.onSecondaryContainer' <<<"$colours")"
+
+sed -i \
+    -e '/^\[Colors:Selection\]/,/^\[/{' \
+    -e "s/^\(BackgroundNormal\|BackgroundAlternate\)=.*/\1=$bg/" \
+    -e "s/^\(ForegroundNormal\|ForegroundActive\|ForegroundInactive\)=.*/\1=$fg/" \
+    -e '}' \
+    "$scheme_file"
