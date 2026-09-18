@@ -11,8 +11,22 @@ fi
 
 toast() { caelestia shell toaster "$1" "Kill process" "$2" dangerous >/dev/null 2>&1 || true; }
 
+# The session itself and the daemons the desktop leans on: killing any of
+# these takes down the compositor, the shell, audio, the clipboard or D-Bus.
+# wl-copy is whatever is on the clipboard right now.
+# Names are ps's comm, which is cut to 15 characters.
+protected='^(systemd|\(sd-pam\)|start-hyprland|Hyprland|Xwayland|qs|quickshell|caelestia|'\
+'pipewire.*|wireplumber|dbus-.*|xdg-.*|at-spi.*|gnome-keyring-d|hyprpolkitagent|polkit.*|'\
+'dconf-service|xsettingsd|wl-clip-persist|wl-paste|wl-copy|status-tray|hypridle|hyprsunset|udiskie|'\
+'gvfs.*|ssh-agent|gpg-agent|fuzzel|kill-pick|ps|awk)$'
+
+# display<TAB>pid<TAB>name. comm can contain spaces ("Isolated Web Co").
 procs=$(ps -u "$USER" -o pid=,rss=,comm= --sort=-rss |
-    awk -v self=$$ '$1 != self { printf "%-28s %7.0f MB\t%s\n", $3, $2 / 1024, $1 }')
+    PROTECTED="$protected" awk -v self=$$ '{
+        pid = $1; rss = $2; $1 = ""; $2 = ""; sub(/^ +/, "")
+        if (pid != self && $0 !~ ENVIRON["PROTECTED"])
+            printf "%-28s %7.0f MB\t%s\t%s\n", $0, rss / 1024, pid, $0
+    }')
 
 index=$(cut -f1 <<<"$procs" | fuzzel --dmenu --index --prompt "󰆴 Kill " \
     --placeholder "Search processes" --lines 15) || exit 0
@@ -20,7 +34,7 @@ index=$(cut -f1 <<<"$procs" | fuzzel --dmenu --index --prompt "󰆴 Kill " \
 
 entry=$(sed -n "$((index + 1))p" <<<"$procs")
 pid=$(cut -f2 <<<"$entry")
-name=$(awk '{print $1}' <<<"$entry")
+name=$(cut -f3 <<<"$entry")
 
 pending="${XDG_RUNTIME_DIR:-/tmp}/kill-pick.pending"
 if [ "$(cat "$pending" 2>/dev/null)" = "$pid" ] && kill -0 "$pid" 2>/dev/null; then
