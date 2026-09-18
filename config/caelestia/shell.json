@@ -312,7 +312,7 @@
         ],
         "tray": {
             "background": false,
-            "compact": true,
+            "compact": false,
             "iconSubs": [
             ],
             "recolour": false

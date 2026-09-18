@@ -2,7 +2,7 @@
     "background": {
         "desktopClock": {
             "enabled": true,
-            "position": "bottom-left"
+            "position": "bottom-right"
         }
     }
 }
