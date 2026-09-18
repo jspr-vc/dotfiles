@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Quick notes in fuzzel. Typing something new and pressing Enter adds it to
+# the inbox; picking an existing note copies it; "Open notes" edits the file.
+
+set -euo pipefail
+
+if pgrep -x fuzzel >/dev/null; then
+    pkill -x fuzzel
+    exit 0
+fi
+
+inbox="${NOTES_INBOX:-$HOME/notes/inbox.md}"
+open_entry="󰈙  Open notes"
+mkdir -p "$(dirname "$inbox")"
+touch "$inbox"
+
+toast() { caelestia shell toaster "$1" "Notes" "$2" edit_note >/dev/null 2>&1 || true; }
+
+notes=$(grep '^- ' "$inbox" | sed 's/^- //' | tac || true)
+choice=$(printf '%s\n' "$open_entry" ${notes:+"$notes"} |
+    fuzzel --dmenu --prompt "󰏫 Note " --placeholder "Type a new note, or search" --lines 12) || exit 0
+[ -n "$choice" ] || exit 0
+
+if [ "$choice" = "$open_entry" ]; then
+    exec ghostty -e nvim "$inbox"
+elif grep -qxF -- "$choice" <<<"$notes"; then
+    printf '%s' "${choice#* | }" | wl-copy
+    toast info "Copied to clipboard"
+else
+    printf -- '- %s | %s\n' "$(date '+%Y-%m-%d %H:%M')" "$choice" >>"$inbox"
+    toast success "Saved"
+fi

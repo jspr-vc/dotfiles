@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Select a region and copy the text in it to the clipboard.
+
+set -euo pipefail
+
+toast() { caelestia shell toaster "$1" "OCR" "$2" document_scanner >/dev/null 2>&1 || true; }
+
+region=$(slurp) || exit 0
+text=$(grim -g "$region" - | tesseract - - 2>/dev/null | tr -d '\f')
+
+if [ -z "${text//[[:space:]]/}" ]; then
+    toast warn "No text found"
+    exit 0
+fi
+
+printf '%s' "$text" | wl-copy
+toast success "Copied $(wc -w <<<"$text") words"

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Pick one of your processes, heaviest first, and ask it to quit (SIGTERM).
+# Picking it again while it's still running force-kills it.
+
+set -euo pipefail
+
+if pgrep -x fuzzel >/dev/null; then
+    pkill -x fuzzel
+    exit 0
+fi
+
+toast() { caelestia shell toaster "$1" "Kill process" "$2" dangerous >/dev/null 2>&1 || true; }
+
+procs=$(ps -u "$USER" -o pid=,rss=,comm= --sort=-rss |
+    awk -v self=$$ '$1 != self { printf "%-28s %7.0f MB\t%s\n", $3, $2 / 1024, $1 }')
+
+index=$(cut -f1 <<<"$procs" | fuzzel --dmenu --index --prompt "󰆴 Kill " \
+    --placeholder "Search processes" --lines 15) || exit 0
+[ -n "$index" ] && [ "$index" -ge 0 ] || exit 0
+
+entry=$(sed -n "$((index + 1))p" <<<"$procs")
+pid=$(cut -f2 <<<"$entry")
+name=$(awk '{print $1}' <<<"$entry")
+
+pending="${XDG_RUNTIME_DIR:-/tmp}/kill-pick.pending"
+if [ "$(cat "$pending" 2>/dev/null)" = "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+    kill -KILL "$pid" && toast success "Force-killed $name ($pid)"
+    rm -f "$pending"
+    exit 0
+fi
+
+if kill -TERM "$pid" 2>/dev/null; then
+    echo "$pid" >"$pending"
+    toast info "Asked $name ($pid) to quit; pick it again to force-kill"
+else
+    toast error "Couldn't signal $name ($pid)"
+fi
