@@ -19,6 +19,22 @@ local mouse = { mouse = true }
 
 bind(MOD .. " + A", hl.dsp.global("caelestia:launcher"), "[Launcher|Apps] app launcher")
 bind(MOD .. " + N", hl.dsp.exec_cmd("caelestia shell drawers toggle sidebar"), "[Launcher|Apps] notifications sidebar")
+bind(MOD .. " + period", hl.dsp.exec_cmd("caelestia shell drawers toggle dashboard"), "[Launcher|Apps] dashboard")
+bind(
+    MOD .. " + SHIFT + C",
+    hl.dsp.exec_cmd("caelestia shell drawers toggle utilities"),
+    "[Launcher|Apps] utilities drawer"
+)
+
+-- status-tray tracks notification ids, since Caelestia can't dismiss one
+-- over IPC. USR1 makes it redraw the DND tray icon right away.
+bind(MOD .. " + X", hl.dsp.exec_cmd("pkill -USR2 -x status-tray"), "[Notifications] dismiss newest notification")
+bind(MOD .. " + SHIFT + X", hl.dsp.exec_cmd("caelestia shell notifs clear"), "[Notifications] clear all notifications")
+bind(
+    MOD .. " + SHIFT + D",
+    hl.dsp.exec_cmd("caelestia shell notifs toggleDnd; pkill -USR1 -x status-tray"),
+    "[Notifications] toggle do not disturb"
+)
 bind(MOD .. " + Backspace", hl.dsp.global("caelestia:session"), "[Window Management] session menu")
 bind(MOD .. " + Delete", hl.dsp.global("caelestia:session"), "[Window Management] session menu")
 bind("CTRL + ALT + Delete", hl.dsp.global("caelestia:session"), "[Window Management] session menu")
@@ -93,6 +109,13 @@ local function float_centered()
     hl.dispatch(hl.dsp.window.center())
 end
 
+local function center_floating()
+    local win = hl.get_active_window()
+    if win and win.floating then
+        hl.dispatch(hl.dsp.window.center())
+    end
+end
+
 local function cycle_to_top()
     hl.dispatch(hl.dsp.window.cycle_next())
     hl.dispatch(hl.dsp.window.alter_zorder({ mode = "top" }))
@@ -106,6 +129,7 @@ bind(
 )
 bind("ALT + F4", close_or_hide, "[Window Management] close focused window")
 bind(MOD .. " + V", float_centered, "[Window Management] toggle float")
+bind(MOD .. " + C", center_floating, "[Window Management] center floating window")
 bind(MOD .. " + SHIFT + F", hl.dsp.window.pin(), "[Window Management] toggle pin")
 bind(MOD .. " + G", hl.dsp.group.toggle(), "[Window Management] toggle group")
 bind(MOD .. " + CTRL + H", hl.dsp.group.prev(), "[Window Management] previous window in group")
@@ -172,7 +196,6 @@ end
 bind(MOD .. " + mouse:272", hl.dsp.window.drag(), "[Window Management|Mouse] hold to move window", mouse)
 bind(MOD .. " + mouse:273", hl.dsp.window.resize(), "[Window Management|Mouse] hold to resize window", mouse)
 bind(MOD .. " + Z", hl.dsp.window.drag(), "[Window Management|Mouse] hold to move window", mouse)
-bind(MOD .. " + X", hl.dsp.window.resize(), "[Window Management|Mouse] hold to resize window", mouse)
 
 --------------------------------------------------------------------------
 -- Workspaces
@@ -320,3 +343,31 @@ bind(
 )
 
 bind(MOD .. " + ALT + Right", hl.dsp.exec_cmd("caelestia wallpaper -r"), "[Utilities] random wallpaper")
+bind(MOD .. " + SHIFT + T", hl.dsp.exec_cmd("ocr"), "[Utilities] copy text from region (OCR)")
+bind(MOD .. " + ALT + N", hl.dsp.exec_cmd("note"), "[Utilities] quick note")
+bind(MOD .. " + ALT + K", hl.dsp.exec_cmd("kill-pick"), "[Utilities] kill a process")
+-- The delay lets the key release pass first; any key or mouse move wakes them.
+bind(
+    MOD .. " + ALT + M",
+    hl.dsp.exec_cmd("sleep 1 && hyprctl dispatch 'hl.dsp.dpms({action = \"off\"})'"),
+    "[Utilities] turn monitors off"
+)
+bind(MOD .. " + SHIFT + I", hl.dsp.exec_cmd("idle-inhibit"), "[Utilities] toggle keep screen awake")
+
+-- Tracked here rather than read back, since a config reload resets it to 1.
+local zoom = 1
+
+local function set_zoom(factor)
+    zoom = math.max(1, math.min(factor, 8))
+    hl.config({ cursor = { zoom_factor = zoom } })
+end
+
+bind(MOD .. " + equal", function()
+    set_zoom(zoom * 1.25)
+end, "[Utilities|Zoom] zoom in", repeating)
+bind(MOD .. " + minus", function()
+    set_zoom(zoom / 1.25)
+end, "[Utilities|Zoom] zoom out", repeating)
+bind(MOD .. " + SHIFT + minus", function()
+    set_zoom(1)
+end, "[Utilities|Zoom] reset zoom")
