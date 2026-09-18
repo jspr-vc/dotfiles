@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Toggle Caelestia's idle inhibitor and say which way it went.
+
+set -euo pipefail
+
+caelestia shell idleInhibitor toggle >/dev/null
+pkill -USR1 -x status-tray || true
+if [ "$(caelestia shell idleInhibitor isEnabled)" = "true" ]; then
+    caelestia shell toaster info "Idle inhibitor" "Screen stays awake" coffee >/dev/null 2>&1 || true
+else
+    caelestia shell toaster info "Idle inhibitor" "Screen can sleep again" bedtime >/dev/null 2>&1 || true
+fi

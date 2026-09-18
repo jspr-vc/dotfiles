@@ -1,0 +1,329 @@
+#!/usr/bin/python3
+# Tray icons for Caelestia toggles the bar has no status icon for (keep awake,
+# do not disturb). Each icon is only in the tray while its toggle is on;
+# hovering shows what it means, and the menu turns it off.
+#
+# Also tracks open notifications, since Caelestia has no IPC to dismiss one:
+# SIGUSR2 closes the newest. SIGUSR1 refreshes the icons at once instead of
+# waiting for the next poll.
+#
+# System python on purpose: it needs the distro's python-dbus and
+# python-gobject, and runs as a desktop helper outside any project env.
+
+import signal
+import subprocess
+from dataclasses import dataclass
+
+import dbus
+import dbus.bus
+import dbus.lowlevel
+import dbus.service
+from dbus.mainloop.glib import DBusGMainLoop
+from gi.repository import GLib, GLibUnix
+
+ITEM_IFACE = "org.kde.StatusNotifierItem"
+ITEM_PATH = "/StatusNotifierItem"
+MENU_IFACE = "com.canonical.dbusmenu"
+MENU_PATH = "/MenuBar"
+WATCHER = "org.kde.StatusNotifierWatcher"
+NOTIFS = "org.freedesktop.Notifications"
+POLL_SECONDS = 3
+
+MENU_LABEL, MENU_SEPARATOR, MENU_ACTION = 1, 2, 3
+
+
+@dataclass(frozen=True)
+class Toggle:
+    key: str
+    title: str
+    description: str
+    action: str
+    icon: str
+    target: str
+    query: str
+    disable: str
+
+
+TOGGLES = [
+    Toggle(
+        key="idle",
+        title="Keeping the screen awake",
+        description="The screen won't dim, lock or sleep",
+        action="Let the screen sleep",
+        icon="caffeine-cup-full",
+        target="idleInhibitor",
+        query="isEnabled",
+        disable="disable",
+    ),
+    Toggle(
+        key="dnd",
+        title="Do not disturb is on",
+        description="Notification popups are hidden",
+        action="Turn off do not disturb",
+        icon="notifications-disabled",
+        target="notifs",
+        query="isDndEnabled",
+        disable="disableDnd",
+    ),
+]
+
+
+def ipc(target: str, function: str) -> str:
+    result = subprocess.run(
+        ["qs", "-c", "caelestia", "ipc", "call", target, function],
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
+
+
+class Item(dbus.service.Object):
+    def __init__(self, conn: dbus.bus.BusConnection, toggle: Toggle, turn_off) -> None:
+        super().__init__(conn, ITEM_PATH)
+        self.toggle = toggle
+        self.turn_off = turn_off
+
+    def props(self) -> dict:
+        t = self.toggle
+        return {
+            "Category": "ApplicationStatus",
+            "Id": f"status-tray-{t.key}",
+            "Title": t.title,
+            "Status": "Active",
+            "IconName": t.icon,
+            "ToolTip": dbus.Struct(
+                (t.icon, dbus.Array([], signature="(iiay)"), t.title, t.description),
+                signature="sa(iiay)ss",
+            ),
+            "ItemIsMenu": False,
+            "Menu": dbus.ObjectPath(MENU_PATH),
+        }
+
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature="ss", out_signature="v")
+    def Get(self, interface: str, prop: str):
+        return self.props()[prop]
+
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature="s", out_signature="a{sv}")
+    def GetAll(self, interface: str) -> dict:
+        return self.props()
+
+    @dbus.service.method(ITEM_IFACE, in_signature="ii")
+    def Activate(self, x: int, y: int) -> None:
+        self.turn_off()
+
+    @dbus.service.method(ITEM_IFACE, in_signature="ii")
+    def SecondaryActivate(self, x: int, y: int) -> None:
+        self.turn_off()
+
+    @dbus.service.method(ITEM_IFACE, in_signature="ii")
+    def ContextMenu(self, x: int, y: int) -> None:
+        pass
+
+    @dbus.service.method(ITEM_IFACE, in_signature="is")
+    def Scroll(self, delta: int, orientation: str) -> None:
+        pass
+
+
+class Menu(dbus.service.Object):
+    """The menu Caelestia pops out on hover: what the icon means, then an off switch."""
+
+    def __init__(self, conn: dbus.bus.BusConnection, toggle: Toggle, turn_off) -> None:
+        super().__init__(conn, MENU_PATH)
+        self.turn_off = turn_off
+        self.entries = {
+            MENU_LABEL: {"label": toggle.title, "enabled": False},
+            MENU_SEPARATOR: {"type": "separator"},
+            MENU_ACTION: {"label": toggle.action},
+        }
+
+    def node(self, node_id: int, props: dict, children: list) -> dbus.Struct:
+        return dbus.Struct(
+            (dbus.Int32(node_id), dbus.Dictionary(props, signature="sv"), dbus.Array(children, signature="v")),
+            signature="ia{sv}av",
+        )
+
+    @dbus.service.method(MENU_IFACE, in_signature="iias", out_signature="u(ia{sv}av)")
+    def GetLayout(self, parent_id: int, depth: int, names: list):
+        if parent_id in self.entries:
+            return dbus.UInt32(1), self.node(parent_id, self.entries[parent_id], [])
+        children = [self.node(i, p, []) for i, p in self.entries.items()]
+        return dbus.UInt32(1), self.node(0, {"children-display": "submenu"}, children)
+
+    @dbus.service.method(MENU_IFACE, in_signature="aias", out_signature="a(ia{sv})")
+    def GetGroupProperties(self, ids: list, names: list) -> list:
+        ids = ids or list(self.entries)
+        return [
+            dbus.Struct((dbus.Int32(i), dbus.Dictionary(self.entries[i], signature="sv")), signature="ia{sv}")
+            for i in ids
+            if i in self.entries
+        ]
+
+    @dbus.service.method(MENU_IFACE, in_signature="is", out_signature="v")
+    def GetProperty(self, node_id: int, name: str):
+        return self.entries[node_id][name]
+
+    @dbus.service.method(MENU_IFACE, in_signature="isvu")
+    def Event(self, node_id: int, event_id: str, data, timestamp: int) -> None:
+        if node_id == MENU_ACTION and event_id == "clicked":
+            self.turn_off()
+
+    @dbus.service.method(MENU_IFACE, in_signature="a(isvu)", out_signature="ai")
+    def EventGroup(self, events: list) -> list:
+        for node_id, event_id, data, timestamp in events:
+            self.Event(node_id, event_id, data, timestamp)
+        return dbus.Array([], signature="i")
+
+    @dbus.service.method(MENU_IFACE, in_signature="i", out_signature="b")
+    def AboutToShow(self, node_id: int) -> bool:
+        return False
+
+    @dbus.service.method(MENU_IFACE, in_signature="ai", out_signature="aiai")
+    def AboutToShowGroup(self, ids: list):
+        return dbus.Array([], signature="i"), dbus.Array([], signature="i")
+
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature="ss", out_signature="v")
+    def Get(self, interface: str, prop: str):
+        return self.GetAll(interface)[prop]
+
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature="s", out_signature="a{sv}")
+    def GetAll(self, interface: str) -> dict:
+        return {
+            "Version": dbus.UInt32(3),
+            "TextDirection": "ltr",
+            "Status": "normal",
+            "IconThemePath": dbus.Array([], signature="s"),
+        }
+
+
+class Indicator:
+    def __init__(self, toggle: Toggle) -> None:
+        self.toggle = toggle
+        self.conn: dbus.bus.BusConnection | None = None
+        self.objects: list[dbus.service.Object] = []
+        self.watcher_owner: str | None = None
+
+    def show(self) -> None:
+        # A private connection per icon, so hiding can drop it and the tray
+        # sees the item's name vanish.
+        conn = dbus.bus.BusConnection(dbus.bus.BUS_SESSION)
+        objects = [Item(conn, self.toggle, self.turn_off), Menu(conn, self.toggle, self.turn_off)]
+        try:
+            owner = conn.get_name_owner(WATCHER)
+            watcher = conn.get_object(WATCHER, "/StatusNotifierWatcher")
+            watcher.RegisterStatusNotifierItem(conn.get_unique_name(), dbus_interface=WATCHER)
+        except dbus.DBusException:
+            self.drop(conn, objects)
+            return
+        self.conn, self.objects, self.watcher_owner = conn, objects, owner
+
+    def hide(self) -> None:
+        if self.conn is None:
+            return
+        self.drop(self.conn, self.objects)
+        self.conn, self.objects, self.watcher_owner = None, [], None
+
+    @staticmethod
+    def drop(conn: dbus.bus.BusConnection, objects: list[dbus.service.Object]) -> None:
+        for obj in objects:
+            obj.remove_from_connection()
+        conn.close()
+
+    def watcher_restarted(self) -> bool:
+        try:
+            return self.conn.get_name_owner(WATCHER) != self.watcher_owner
+        except dbus.DBusException:
+            return True
+
+    def refresh(self) -> None:
+        enabled = ipc(self.toggle.target, self.toggle.query) == "true"
+        if enabled and self.conn is not None and self.watcher_restarted():
+            self.hide()
+        if enabled and self.conn is None:
+            self.show()
+        elif not enabled:
+            self.hide()
+
+    def turn_off(self) -> None:
+        ipc(self.toggle.target, self.toggle.disable)
+        self.refresh()
+
+
+class Notifications:
+    """Watches the bus for Notify replies and closes, keeping open ids in order."""
+
+    def __init__(self) -> None:
+        self.pending: set[tuple[str, int]] = set()
+        self.open: list[int] = []
+        self.bus = dbus.SessionBus()
+
+        monitor = dbus.bus.BusConnection(dbus.bus.BUS_SESSION)
+        monitor.add_message_filter(self.on_message)
+        rules = [
+            f"type='method_call',interface='{NOTIFS}',member='Notify'",
+            "type='method_return'",
+            f"type='signal',interface='{NOTIFS}',member='NotificationClosed'",
+        ]
+        monitor.call_blocking(
+            "org.freedesktop.DBus",
+            "/org/freedesktop/DBus",
+            "org.freedesktop.DBus.Monitoring",
+            "BecomeMonitor",
+            "asu",
+            (rules, dbus.UInt32(0)),
+        )
+        self.monitor = monitor
+
+    def on_message(self, conn, msg) -> None:
+        if isinstance(msg, (dbus.lowlevel.MethodCallMessage, dbus.lowlevel.SignalMessage)):
+            if msg.get_interface() != NOTIFS:
+                return
+        if isinstance(msg, dbus.lowlevel.MethodCallMessage):
+            self.pending.add((msg.get_sender(), msg.get_serial()))
+        elif isinstance(msg, dbus.lowlevel.MethodReturnMessage):
+            key = (msg.get_destination(), msg.get_reply_serial())
+            if key in self.pending:
+                self.pending.discard(key)
+                notif_id = int(msg.get_args_list()[0])
+                if notif_id in self.open:
+                    self.open.remove(notif_id)
+                self.open.append(notif_id)
+        elif isinstance(msg, dbus.lowlevel.SignalMessage):
+            notif_id = int(msg.get_args_list()[0])
+            if notif_id in self.open:
+                self.open.remove(notif_id)
+
+    def dismiss_newest(self) -> None:
+        if not self.open:
+            return
+        notif_id = self.open.pop()
+        try:
+            self.bus.call_blocking(
+                NOTIFS, "/org/freedesktop/Notifications", NOTIFS, "CloseNotification", "u", (dbus.UInt32(notif_id),)
+            )
+        except dbus.DBusException:
+            pass
+
+
+def main() -> None:
+    DBusGMainLoop(set_as_default=True)
+    indicators = [Indicator(t) for t in TOGGLES]
+    notifications = Notifications()
+
+    def refresh() -> bool:
+        for indicator in indicators:
+            indicator.refresh()
+        return True
+
+    def dismiss() -> bool:
+        notifications.dismiss_newest()
+        return True
+
+    refresh()
+    GLib.timeout_add_seconds(POLL_SECONDS, refresh)
+    GLibUnix.signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, refresh)
+    GLibUnix.signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR2, dismiss)
+    GLib.MainLoop().run()
+
+
+if __name__ == "__main__":
+    main()

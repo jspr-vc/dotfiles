@@ -28,6 +28,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprsunset")
     hl.exec_cmd("udiskie --no-automount --smart-tray")
     hl.exec_cmd("xsettingsd")
+    hl.exec_cmd("status-tray")
     hl.exec_cmd("hyprpm reload -n")
 
     -- Shell. A fresh compositor starts outside game mode, so undo any frame
