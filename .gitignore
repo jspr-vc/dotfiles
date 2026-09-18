@@ -6,6 +6,7 @@ config/caelestia/*.pre-*
 # Local state that lands in symlinked dirs
 config/zsh/.zcompdump*
 config/zsh/.zsh_history
+config/zsh/user.zsh
 
 # bun editor types only; the installer never needs them
 node_modules/

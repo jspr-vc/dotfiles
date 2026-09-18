@@ -118,5 +118,49 @@ alias mv_stl='mv --verbose --force ~/Downloads/*.{stl,3mf} ~/Documents/3d\ print
 alias dot='cd ~/dotfiles && nvim .'
 alias dotc='cd ~/dotfiles && claude --model opus'
 
+# Functions
+function docker_close() {
+  sudo sh -c 'docker stop $(docker ps -a -q)'
+}
+
+function gwc() {
+    local selected_worktree=$(git worktree list | fzf --height 40% --reverse --header "Select Git Worktree" | awk '{print $1}')
+
+    # 3. If a selection was made (not escaped/cancelled), cd into it
+    if [ -n "$selected_worktree" ]; then
+        cd "$selected_worktree" || return
+        echo "Switched to: $(pwd)"
+    else
+        echo "No worktree selected."
+    fi
+}
+
+function venv() {
+  DIR=$(basename "$PWD")
+  pyenv virtualenv $DIR
+  pyenv activate $DIR
+}
+
+function activate() {
+  DIR=$(basename "$PWD")
+  pyenv activate $DIR
+}
+
+function nowplaying() {
+  echo "[$(playerctl metadata xesam:title)]($(playerctl metadata xesam:url))"
+}
+
+function np() {
+  playerctl metadata xesam:title
+}
+
+function npl() {
+  playerctl metadata xesam:url
+}
+
+function cheatsh() {
+    curl cheat.sh/"$1"
+}
+
 # Machine-local additions
 [[ -r "$ZDOTDIR/user.zsh" ]] && source "$ZDOTDIR/user.zsh"
