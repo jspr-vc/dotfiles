@@ -434,16 +434,25 @@
         "actions": [
             {
                 "command": [
-                    "caelestia",
-                    "shell",
-                    "gameMode",
-                    "toggle"
+                    "game-mode"
                 ],
                 "dangerous": false,
-                "description": "Toggle animations, blur, gaps and shadows for gaming",
+                "description": "Toggle animations, blur, gaps, shadows and the screen frame for gaming",
                 "enabled": true,
                 "icon": "sports_esports",
                 "name": "Game mode"
+            },
+            {
+                "command": [
+                    "hyprctl",
+                    "dispatch",
+                    "require(\"rules\").toggle_screenshare_protection"
+                ],
+                "dangerous": false,
+                "description": "Hide or show protected windows in screen captures",
+                "enabled": true,
+                "icon": "visibility_off",
+                "name": "Screen-share protection"
             },
             {
                 "command": [

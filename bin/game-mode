@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Caelestia's game mode only touches Hyprland options. This also drops the
+# shell's screen frame (border thickness and rounding) by editing shell.json,
+# which Caelestia live-reloads. The original values are stashed in the state
+# dir and written back on the way out.
+#
+#   game-mode [toggle]   flip game mode
+#   game-mode on|off     force a state
+#   game-mode restore    put the frame back without touching game mode
+
+set -euo pipefail
+
+config="${XDG_CONFIG_HOME:-$HOME/.config}/caelestia/shell.json"
+config="$(readlink -f "$config")"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/game-mode"
+stash="$state_dir/border"
+
+# Only the lines inside the top-level "border" block, so the rest of the file
+# keeps Caelestia's own formatting.
+border_value() {
+    sed -n '/^    "border": {/,/^    }/s/^ *"'"$1"'": *\([0-9.]*\).*/\1/p' "$config"
+}
+
+set_border_value() {
+    sed -i '/^    "border": {/,/^    }/s/^\( *"'"$1"'": *\)[0-9.]*/\1'"$2"'/' "$config"
+}
+
+drop_frame() {
+    if [ ! -f "$stash" ]; then
+        mkdir -p "$state_dir"
+        printf '%s %s\n' "$(border_value thickness)" "$(border_value rounding)" >"$stash"
+    fi
+    set_border_value thickness 0
+    set_border_value rounding 0
+}
+
+restore_frame() {
+    [ -f "$stash" ] || return 0
+    read -r thickness rounding <"$stash"
+    set_border_value thickness "$thickness"
+    set_border_value rounding "$rounding"
+    rm -f "$stash"
+}
+
+enabled() { [ "$(caelestia shell gameMode isEnabled)" = "true" ]; }
+
+on() {
+    drop_frame
+    caelestia shell gameMode enable
+}
+
+off() {
+    restore_frame
+    caelestia shell gameMode disable
+}
+
+case "${1:-toggle}" in
+toggle) if enabled; then off; else on; fi ;;
+on) on ;;
+off) off ;;
+restore) restore_frame ;;
+*)
+    echo "usage: game-mode [toggle|on|off|restore]" >&2
+    exit 1
+    ;;
+esac

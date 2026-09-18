@@ -30,8 +30,9 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("xsettingsd")
     hl.exec_cmd("hyprpm reload -n")
 
-    -- Shell
-    hl.exec_cmd("caelestia shell -d")
+    -- Shell. A fresh compositor starts outside game mode, so undo any frame
+    -- game-mode left stripped when the last session ended.
+    hl.exec_cmd("game-mode restore; caelestia shell -d")
 
     hl.exec_cmd("dotfiles-check")
 end)

@@ -286,8 +286,8 @@ bind(MOD .. " + U", hl.dsp.exec_cmd("bt-pick"), "[Hardware Controls|Bluetooth] c
 -- Utilities
 --------------------------------------------------------------------------
 
-bind(MOD .. " + ALT + Return", hl.dsp.exec_cmd("caelestia shell gameMode toggle"), "[Utilities] toggle game mode")
-bind(MOD .. " + ALT + G", hl.dsp.exec_cmd("caelestia shell gameMode toggle"), "[Utilities] toggle game mode")
+bind(MOD .. " + ALT + Return", hl.dsp.exec_cmd("game-mode"), "[Utilities] toggle game mode")
+bind(MOD .. " + ALT + G", hl.dsp.exec_cmd("game-mode"), "[Utilities] toggle game mode")
 
 -- Caelestia's picker and notification hand off to `swappy`, which bin/swappy
 -- redirects to satty.
