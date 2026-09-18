@@ -32,11 +32,7 @@ bind("CTRL + SHIFT + space", hl.dsp.exec_cmd("1password --quick-access"), "[Laun
 bind(MOD .. " + slash", hl.dsp.exec_cmd("keys-hint"), "[Launcher|Apps] keybind cheat sheet")
 bind(MOD .. " + comma", hl.dsp.exec_cmd("caelestia emoji -p"), "[Launcher|Apps] emoji and glyph picker")
 bind(MOD .. " + SHIFT + V", hl.dsp.exec_cmd("caelestia clipboard"), "[Launcher|Apps] clipboard history")
-bind(
-    MOD .. " + SHIFT + CTRL + V",
-    hl.dsp.exec_cmd("caelestia clipboard -d"),
-    "[Launcher|Apps] delete from clipboard history"
-)
+bind(MOD .. " + SHIFT + CTRL + V", hl.dsp.exec_cmd("clip-menu"), "[Launcher|Apps] clipboard actions")
 bind(MOD .. " + Tab", hl.dsp.exec_cmd("win-pick"), "[Launcher|Apps] window switcher")
 
 --------------------------------------------------------------------------

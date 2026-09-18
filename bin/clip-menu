@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Clipboard actions in fuzzel: browse or prune the cliphist history, and fix
+# up whatever is on the clipboard right now.
+
+set -euo pipefail
+
+if pgrep -x fuzzel >/dev/null; then
+    pkill -x fuzzel
+    exit 0
+fi
+
+toast() { caelestia shell toaster "$1" "Clipboard" "$2" content_paste >/dev/null 2>&1 || true; }
+
+pick() {
+    local prompt="$1" placeholder="$2"
+    shift 2
+    printf '%s\n' "$@" | fuzzel --dmenu --index --prompt "$prompt " --placeholder "$placeholder" \
+        --lines "$#" --minimal-lines || true
+}
+
+confirm() {
+    [ "$(pick "󰗖 $1" "Are you sure?" "󰄬  Yes" "󰅖  No")" = "0" ]
+}
+
+save_image() {
+    local mime dir file
+    mime=$(wl-paste --list-types | grep -m1 '^image/' || true)
+    if [ -z "$mime" ]; then
+        toast warn "No image on the clipboard"
+        return
+    fi
+    dir="$(xdg-user-dir PICTURES 2>/dev/null || echo "$HOME/Pictures")/Clipboard"
+    mkdir -p "$dir"
+    file="$dir/$(date +%Y-%m-%d_%H-%M-%S).${mime#image/}"
+    wl-paste --type "$mime" >"$file"
+    toast success "Saved to ${file/#"$HOME"/\~}"
+}
+
+plain_text() {
+    local text
+    if ! text=$(wl-paste --no-newline --type text 2>/dev/null) || [ -z "$text" ]; then
+        toast warn "No text on the clipboard"
+        return
+    fi
+    printf '%s' "$text" | wl-copy --type text/plain
+    toast success "Formatting stripped"
+}
+
+count=$(cliphist list | wc -l)
+
+actions=(
+    "󰅌  History ($count)"
+    "󰆴  Delete an item"
+    "󰃢  Delete all history"
+    "󰉠  Strip formatting from current"
+    "󰋩  Save current image to file"
+    "󰅙  Clear current clipboard"
+)
+
+case "$(pick "󰅌 Clipboard" "Select action" "${actions[@]}")" in
+0) caelestia clipboard ;;
+1) caelestia clipboard -d ;;
+2)
+    if [ "$count" -eq 0 ]; then
+        toast info "History is already empty"
+    elif confirm "Delete $count items"; then
+        cliphist wipe
+        toast success "History cleared"
+    fi
+    ;;
+3) plain_text ;;
+4) save_image ;;
+5)
+    wl-copy --clear
+    toast success "Clipboard cleared"
+    ;;
+esac
