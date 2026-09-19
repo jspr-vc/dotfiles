@@ -463,7 +463,7 @@
                 "dangerous": false,
                 "description": "Open a private Zen Browser window",
                 "enabled": true,
-                "icon": "visibility_off",
+                "icon": "domino_mask",
                 "name": "Zen Private"
             },
             {
