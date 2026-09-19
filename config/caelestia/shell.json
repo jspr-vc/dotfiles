@@ -412,17 +412,17 @@
                         "brightnessctl",
                         "-r"
                     ],
-                    "timeout": 60
+                    "timeout": 1800
                 },
                 {
                     "idleAction": "lock",
-                    "timeout": 120
+                    "timeout": 1860
                 },
                 {
                     "idleAction": [
                         "idle-suspend"
                     ],
-                    "timeout": 300
+                    "timeout": 2040
                 }
             ]
         },
