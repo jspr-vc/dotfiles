@@ -13,7 +13,7 @@ Two machines, selected by hostname:
 config/      symlinked to ~/.config/<name>
   hypr/      hyprland.lua entry; env, options, scheme, rules, binds, autostart; devices/<hostname>.lua last
   caelestia/ shell.json, cli.json (scheme postHook), custom schemes, user templates
-  ghostty/ fuzzel/ zsh/ tmux/ satty/ MangoHud/ gtk-3.0/ xsettingsd/ xdg-desktop-portal/ starship.toml, electron and app flag files, dolphinrc kdeglobals baloofilerc
+  ghostty/ fuzzel/ gh-dash/ zsh/ tmux/ satty/ zathura/ MangoHud/ gtk-3.0/ xsettingsd/ xdg-desktop-portal/ starship.toml, electron and app flag files, dolphinrc kdeglobals baloofilerc
 bin/         symlinked to ~/.local/bin: audio-pick bt-pick win-pick keys-hint idle-suspend screenshot screenshot-unblocked swappy (satty shim) sddm-sync qt-sync game-mode clip-menu ocr idle-inhibit status-tray note kill-pick
 home/        symlinked to ~ (.zshenv)
 sddm/        the login theme, copied to /usr/share/sddm/themes/caelestia

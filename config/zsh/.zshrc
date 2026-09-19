@@ -36,7 +36,7 @@ command -v starship >/dev/null && eval "$(starship init zsh)"
 command -v zoxide >/dev/null && eval "$(zoxide init zsh --cmd cd)"
 command -v fzf >/dev/null && source <(fzf --zsh)
 [[ -r ~/Scripts/fzf-git.sh ]] && source ~/Scripts/fzf-git.sh
-[[ -r /usr/share/nvm/init-nvm.sh ]] && source /usr/share/nvm/init-nvm.sh
+command -v fnm >/dev/null && eval "$(fnm env --use-on-cd --version-file-strategy=recursive --shell zsh)"
 
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
@@ -85,13 +85,14 @@ alias vim='nvim'
 alias config='nvim ~/dotfiles'
 alias zshconfig='nvim $ZDOTDIR/.zshrc'
 alias t='tmux new-session -A -s'
-alias repos='cd ~/Repos'
+alias repos='cd ~/repos'
 alias ch='cd ~/claude-home/ && claude'
 alias mkdir='mkdir -p'
 alias pip='pyenv exec pip'
 alias python='pyenv exec python'
 alias ds='systemctl start docker'
 alias ld='sudo lazydocker'
+alias ghd='gh-dash'
 alias a='git add .'
 alias s='git status -s'
 alias c='git commit'
@@ -144,6 +145,14 @@ function venv() {
 function activate() {
   DIR=$(basename "$PWD")
   pyenv activate $DIR
+}
+
+function y() {
+    local tmp="$(mktemp -t yazi-cwd.XXXXXX)" cwd
+    yazi "$@" --cwd-file="$tmp"
+    cwd="$(<"$tmp")"
+    [[ -n "$cwd" && "$cwd" != "$PWD" ]] && builtin cd -- "$cwd"
+    rm -f -- "$tmp"
 }
 
 function nowplaying() {

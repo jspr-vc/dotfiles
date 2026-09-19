@@ -1,0 +1,76 @@
+prSections:
+  - title: Mine
+    filters: is:open author:@me
+  - title: Review
+    filters: is:open review-requested:@me
+  - title: Involved
+    filters: is:open involves:@me -author:@me
+  - title: MTH
+    filters: is:open org:make-things-happen
+  - title: Concept Zero
+    filters: is:open org:concept-zero
+  - title: AMP
+    filters: is:open org:american-majority-project
+  - title: PartyLabs
+    filters: is:open org:PartyLabs
+
+issuesSections:
+  - title: Assigned
+    filters: is:open assignee:@me
+  - title: Mine
+    filters: is:open author:@me
+  - title: Involved
+    filters: is:open involves:@me -author:@me -assignee:@me
+
+notificationsSections:
+  - title: All
+    filters: ""
+  - title: Review Requested
+    filters: reason:review-requested
+  - title: Mentioned
+    filters: reason:mention
+
+defaults:
+  view: prs
+  prsLimit: 20
+  issuesLimit: 20
+  prApproveComment: LGTM
+  preview:
+    open: true
+    width: 0.45
+
+pager:
+  diff: delta
+
+# Clone dirs don't always match repo names, so each one is listed.
+repoPaths:
+  jspr-vc/dotfiles: ~/dotfiles
+  jspr-vc/ai-eng-assignment: ~/repos/ai-eng-assignment
+  jspr-vc/jspr-archive: ~/repos/jspr-archive
+  jspr-vc/job-search: ~/repos/job-search
+  jspr-vc/frnds: ~/repos/frnds
+  jspr-vc/jspr-vc: ~/repos/jspr-vc
+  jspr-vc/sndbx: ~/repos/jspr-sndbx
+  jspr-vc/prty: ~/repos/gameshows
+  make-things-happen/drs-autoplay: ~/repos/drs-autoplay
+  make-things-happen/shroud-fullstack: ~/repos/shroud
+  make-things-happen/shroud: ~/repos/cloak
+  make-things-happen/womo-autostream: ~/repos/womo-autostream
+  make-things-happen/sample-casino: ~/repos/sample-casino
+  make-things-happen/drs-pipeline: ~/repos/drs-data-pipeline
+  make-things-happen/womo: ~/repos/womo
+  concept-zero/armchair-ai: ~/repos/armchair-ai
+  concept-zero/website: ~/repos/conceptzero
+  concept-zero/multimod: ~/repos/multimod
+  american-majority-project/helm-monorepo: ~/repos/campainless-monorepo
+  CloserConnection/closer-app: ~/repos/closer
+  Casper-Studios/ai-eng-assignment: ~/repos/casper-take-home
+  Clout-Kitchen/rally: ~/repos/trash
+  Manokii/makima: ~/repos/makima
+  Manokii/link-jspr: ~/repos/link-jspr
+  Manokii/lily58-zmk: ~/repos/lily58-zmk
+  Manokii/prospector-lily58-zmk: ~/repos/prospector-lily58-zmk
+
+confirmQuit: false
+showAuthorIcons: true
+smartFilteringAtLaunch: true

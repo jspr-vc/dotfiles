@@ -28,7 +28,7 @@ hl.window_rule({
 })
 hl.window_rule({
     name = "dialogs-float",
-    match = { class = "^(yad|zenity|wev|blueman-manager|nwg-look|hyprland-share-picker)$" },
+    match = { class = "^(yad|zenity|wev|nwg-look|hyprland-share-picker)$" },
     float = true,
 })
 hl.window_rule({
@@ -98,7 +98,7 @@ hl.window_rule({ name = "xeneon-edge", match = { title = "^(xeneon-edge)$" }, mo
 local protected = {
     { name = "1password", match = { class = "^(1password)$" } },
     { name = "1password-quick-access", match = { title = "^(Quick Access — 1Password)$" } },
-    { name = "polkit-agent", match = { class = "^(hyprpolkitagent|polkit-gnome-authentication-agent-1)$" } },
+    { name = "polkit-agent", match = { class = "^(hyprpolkitagent)$" } },
     { name = "discord", match = { class = "^(discord)$" } },
     { name = "slack", match = { class = "^(Slack)$" } },
     { name = "obs", match = { class = "^(com.obsproject.Studio)$" } },

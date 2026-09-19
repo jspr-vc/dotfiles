@@ -13,17 +13,16 @@ if command -v tmux &>/dev/null; then
     [ -x "${HOME}/.tmux/plugins/tpm/scripts/install_plugins.sh" ] && "${HOME}/.tmux/plugins/tpm/scripts/install_plugins.sh" >/dev/null
 fi
 
-if pkg_installed nvm; then
-    # shellcheck source=/dev/null
-    source /usr/share/nvm/init-nvm.sh
-    if command -v node &>/dev/null; then
+if pkg_installed fnm; then
+    eval "$(fnm env --shell bash)"
+    if fnm list | grep -q default; then
         info "node present ($(node --version))"
     else
-        nvm install 20
-        nvm use 20
+        fnm install --lts
+        fnm default lts-latest
     fi
 else
-    warn "nvm not installed, skipping node"
+    warn "fnm not installed, skipping node"
 fi
 
 if pkg_installed fzf; then
