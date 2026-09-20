@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # Caelestia's game mode only touches Hyprland options. This also drops the
-# shell's screen frame (border thickness and rounding) by editing shell.json,
-# which Caelestia live-reloads. The original values are stashed in the state
-# dir and written back on the way out.
+# shell's screen frame (border thickness and rounding) and zeroes the shell's
+# own animation durations by editing shell.json, which Caelestia live-reloads.
+# The original values are stashed in the state dir and written back on the way
+# out.
 #
 #   game-mode [toggle]   flip game mode
 #   game-mode on|off     force a state
-#   game-mode restore    put the frame back without touching game mode
+#   game-mode restore    put the frame and animations back without touching game mode
 
 set -euo pipefail
 
@@ -15,30 +16,39 @@ config="$(readlink -f "$config")"
 state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/game-mode"
 stash="$state_dir/border"
 
-# Only the lines inside the top-level "border" block, so the rest of the file
-# keeps Caelestia's own formatting.
-border_value() {
-    sed -n '/^    "border": {/,/^    }/s/^ *"'"$1"'": *\([0-9.]*\).*/\1/p' "$config"
+# Line ranges for the blocks we touch, so the rest of the file keeps
+# Caelestia's own formatting and sibling "scale" keys stay untouched.
+border_block='/^    "border": {/,/^    }/'
+anim_block='/^            "durations": {/,/^            }/'
+
+get_value() {
+    sed -n "$1"'s/^ *"'"$2"'": *\([0-9.]*\).*/\1/p' "$config"
 }
 
-set_border_value() {
-    sed -i '/^    "border": {/,/^    }/s/^\( *"'"$1"'": *\)[0-9.]*/\1'"$2"'/' "$config"
+set_value() {
+    sed -i "$1"'s/^\( *"'"$2"'": *\)[0-9.]*/\1'"$3"'/' "$config"
 }
 
 drop_frame() {
     if [ ! -f "$stash" ]; then
         mkdir -p "$state_dir"
-        printf '%s %s\n' "$(border_value thickness)" "$(border_value rounding)" >"$stash"
+        printf '%s %s %s\n' \
+            "$(get_value "$border_block" thickness)" \
+            "$(get_value "$border_block" rounding)" \
+            "$(get_value "$anim_block" scale)" >"$stash"
     fi
-    set_border_value thickness 0
-    set_border_value rounding 0
+    set_value "$border_block" thickness 0
+    set_value "$border_block" rounding 0
+    set_value "$anim_block" scale 0
 }
 
 restore_frame() {
     [ -f "$stash" ] || return 0
-    read -r thickness rounding <"$stash"
-    set_border_value thickness "$thickness"
-    set_border_value rounding "$rounding"
+    read -r thickness rounding anim_scale <"$stash"
+    set_value "$border_block" thickness "$thickness"
+    set_value "$border_block" rounding "$rounding"
+    # Stashes written before animations were part of game mode have no third field.
+    [ -n "$anim_scale" ] && set_value "$anim_block" scale "$anim_scale"
     rm -f "$stash"
 }
 
