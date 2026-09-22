@@ -19,13 +19,22 @@ local mouse = { mouse = true }
 
 -- The caelestia:launcher global only toggles on key release, and Hyprland
 -- drops that release when SUPER is let go before A. Toggling over IPC
--- fires on press instead; qs directly skips the ~100ms caelestia CLI startup.
+-- fires on press instead. All drawer binds call qs directly to skip the
+-- ~100ms caelestia CLI startup.
 bind(MOD .. " + A", hl.dsp.exec_cmd("qs -c caelestia ipc call drawers toggle launcher"), "[Launcher|Apps] app launcher")
-bind(MOD .. " + N", hl.dsp.exec_cmd("caelestia shell drawers toggle sidebar"), "[Launcher|Apps] notifications sidebar")
-bind(MOD .. " + period", hl.dsp.exec_cmd("caelestia shell drawers toggle dashboard"), "[Launcher|Apps] dashboard")
+bind(
+    MOD .. " + N",
+    hl.dsp.exec_cmd("qs -c caelestia ipc call drawers toggle sidebar"),
+    "[Launcher|Apps] notifications sidebar"
+)
+bind(
+    MOD .. " + period",
+    hl.dsp.exec_cmd("qs -c caelestia ipc call drawers toggle dashboard"),
+    "[Launcher|Apps] dashboard"
+)
 bind(
     MOD .. " + SHIFT + C",
-    hl.dsp.exec_cmd("caelestia shell drawers toggle utilities"),
+    hl.dsp.exec_cmd("qs -c caelestia ipc call drawers toggle utilities"),
     "[Launcher|Apps] utilities drawer"
 )
 
