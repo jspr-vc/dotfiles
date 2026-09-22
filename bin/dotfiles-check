@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-# Toast if ~/dotfiles is behind its remote. Fetches over HTTPS so it works
-# without the SSH agent (1Password) being unlocked.
+# Refresh ~/dotfiles' remote ref so status-tray can tell whether this machine is
+# behind, and toast at login if it is. Fetches over HTTPS so it works without
+# the SSH agent (1Password) being unlocked.
+#
+# --fetch skips the toast and only updates the ref; status-tray calls it on a
+# timer so the tray icon keeps up with pushes made mid-session.
 
 set -euo pipefail
 
@@ -15,9 +19,19 @@ url=$(git remote get-url origin | sed -E 's#^(ssh://)?git@github\.com[:/]#https:
 GIT_TERMINAL_PROMPT=0 git -c credential.helper= fetch -q "$url" \
     "+refs/heads/${branch}:refs/remotes/origin/${branch}"
 
+if [ "${1:-}" = "--fetch" ]; then
+    exit 0
+fi
+
 behind=$(git rev-list --count "HEAD..origin/${branch}")
 [ "$behind" -gt 0 ] || exit 0
 
-sleep 5
-caelestia shell toaster warn "Dotfiles outdated" \
-    "${behind} commit(s) behind origin/${branch}" "sync" >/dev/null 2>&1 || true
+# The toaster target only exists once the shell has loaded its QML, and a login
+# fetch beats that. caelestia exits 0 whether or not the target was there, so
+# the output is the only signal: retry until it stops saying the target is gone.
+for _ in $(seq 30); do
+    out=$(caelestia shell toaster warn "Dotfiles outdated" \
+        "${behind} commit(s) behind origin/${branch}" "sync" 2>&1 || true)
+    [ "$out" = "Target not found." ] || exit 0
+    sleep 1
+done
