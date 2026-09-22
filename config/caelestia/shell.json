@@ -306,7 +306,7 @@
                 "id": "bluetooth"
             },
             {
-                "enabled": false,
+                "enabled": true,
                 "id": "battery"
             }
         ],
@@ -781,39 +781,21 @@
                         "nmcli",
                         "connection",
                         "up",
-                        "sg-sin-wg-102"
+                        "sg-sin-wg-001"
                     ],
                     "disconnectCmd": [
                         "nmcli",
                         "connection",
                         "down",
-                        "sg-sin-wg-102"
+                        "sg-sin-wg-001"
                     ],
-                    "displayName": "Singapore (sg-sin-wg-102)",
-                    "id": "vpn-sg-sin-wg-102",
-                    "interface": "sg-sin-wg-102",
-                    "name": "wireguard"
-                },
-                {
-                    "connectCmd": [
-                        "nmcli",
-                        "connection",
-                        "up",
-                        "us-qas-wg-305"
-                    ],
-                    "disconnectCmd": [
-                        "nmcli",
-                        "connection",
-                        "down",
-                        "us-qas-wg-305"
-                    ],
-                    "displayName": "US Quincy (us-qas-wg-305)",
-                    "id": "vpn-us-qas-wg-305",
-                    "interface": "us-qas-wg-305",
+                    "displayName": "Singapore (sg-sin-wg-001)",
+                    "id": "vpn-sg-sin-wg-001",
+                    "interface": "sg-sin-wg-001",
                     "name": "wireguard"
                 }
             ],
-            "selectedProvider": "vpn-sg-sin-wg-102"
+            "selectedProvider": "vpn-sg-sin-wg-001"
         }
     }
 }
