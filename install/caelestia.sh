@@ -40,7 +40,18 @@ fi
 # so a fresh machine, or a template added since the last change, has them.
 # Any scheme argument triggers the apply; the current mode changes nothing.
 # Runs after dotfiles (templates linked) and sddm (the postHook's theme dir).
-if caelestia scheme set -m "$(caelestia scheme get -m)" >/dev/null; then
+#
+# The Chromium theming runs `brave --refresh-platform-policy --no-startup-window`
+# and waits on it. With Brave closed that starts a windowless Brave that never
+# exits, so the apply hangs. Kill that child once it outlives a normal handoff
+# to a running Brave; the policy file is already written and read on next start.
+caelestia scheme set -m "$(caelestia scheme get -m)" >/dev/null &
+apply_pid=$!
+while kill -0 "$apply_pid" 2>/dev/null; do
+    sleep 2
+    pkill -P "$apply_pid" -f -- '--refresh-platform-policy' || true
+done
+if wait "$apply_pid"; then
     info "scheme re-applied, templates rendered"
 else
     warn "caelestia scheme apply failed; run 'caelestia scheme set -m dark' by hand"
