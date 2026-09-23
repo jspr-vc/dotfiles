@@ -8,6 +8,8 @@ export default {
     gamemode: "per-game performance daemon, separate from the caelestia game mode toggle",
     mangohud: "in-game performance overlay, layout in config/MangoHud",
     gamescope: "micro compositor for games that need a fixed resolution",
+    "proton-ge-custom-bin": "Proton with extra fixes, pick it per game in steam",
+    "wine-staging": "runs Windows programs outside steam",
   },
 
   music: {
@@ -29,6 +31,36 @@ export default {
     zathura: "keyboard-driven PDF viewer that reloads on change, config/zathura",
     "zathura-pdf-mupdf": "PDF backend for zathura",
     "matugen-bin": "Material colour generation used by caelestia schemes",
+    firefox: "browser",
+    "brave-bin": "browser",
+    "google-chrome": "browser",
+    thunderbird: "mail",
+    "libreoffice-fresh": "office suite",
+    qbittorrent: "torrents",
+    viber: "chat",
+    flatpak: "apps not packaged for Arch",
+    "vlc-plugin-ass": "styled subtitles for vlc",
+    "mullvad-vpn": "VPN client, daemon enabled in install/services.sh",
+    "wireguard-tools": "wg-quick for WireGuard profiles",
+    isoimagewriter: "writes ISOs to USB",
+    "ventoy-bin": "multi-ISO bootable USB",
+  },
+
+  cli: {
+    "github-cli": "gh, used by gh-dash and the sync skill",
+    "1password-cli": "op, secrets from 1Password in scripts",
+    fastfetch: "system info",
+    "pacman-contrib": "paccache, checkupdates, pactree",
+    imagemagick: "image conversion",
+    "yt-dlp": "video downloader",
+    parallel: "GNU parallel",
+    bind: "dig and nslookup",
+    vim: "fallback editor",
+    luarocks: "Lua package manager",
+    typst: "typesetting",
+    pamixer: "PulseAudio mixer CLI",
+    "mesa-utils": "glxinfo for GPU checks",
+    "libva-utils": "vainfo for hardware decode checks",
   },
 
   dev: {
@@ -47,7 +79,37 @@ export default {
     ffmpeg: "video thumbnails in yazi",
     dust: "du replacement",
     duf: "df replacement",
+    "visual-studio-code-bin": "VS Code, Microsoft's build with the official marketplace",
+    pyenv: "python version manager, set up in .zshrc",
+    "pyenv-virtualenv": "pyenv virtualenv-init in .zshrc",
+    postgresql: "psql client",
+    act: "run GitHub Actions locally",
+    ngrok: "tunnels to local servers",
+    "postman-bin": "API client",
     // "opencode-bin": "AI agent opened in the special:ai workspace",
+  },
+
+  containers: {
+    docker: "container engine, started on demand by the ds alias",
+    "docker-compose": "docker compose",
+    "docker-buildx": "docker buildx",
+    podman: "daemonless container engine",
+    "podman-compose": "compose files on podman",
+  },
+
+  cloud: {
+    opentofu: "infrastructure as code",
+    "aws-cli-bin": "aws",
+    "google-cloud-cli": "gcloud",
+  },
+
+  hardware: {
+    "arduino-cli": "Arduino builds and uploads",
+    "avr-gcc": "AVR compiler",
+    "avr-binutils": "AVR assembler and linker",
+    "avr-libc": "AVR C runtime",
+    avrdude: "flashes AVR microcontrollers",
+    "vial-appimage": "keyboard configurator",
   },
 
   lint: {
