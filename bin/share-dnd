@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Hold Caelestia's do-not-disturb on while a screen share runs.
+# Notifications live on caelestia-drawers, a fullscreen layer, so hiding them
+# with no_screen_share would black out the whole monitor. Only DND that this
+# script turned on is turned off again, so a manual DND survives the share.
+
+set -euo pipefail
+
+marker="${XDG_STATE_HOME:-$HOME/.local/state}/hypr/share-dnd"
+ipc() { qs -c caelestia ipc call notifs "$@"; }
+
+case "${1:-}" in
+    start)
+        [ -e "$marker" ] && exit 0
+        [ "$(ipc isDndEnabled)" = "true" ] && exit 0
+        mkdir -p "$(dirname "$marker")"
+        touch "$marker"
+        ipc enableDnd
+        ;;
+    stop)
+        [ -e "$marker" ] || exit 0
+        rm -f "$marker"
+        ipc disableDnd
+        ;;
+    *)
+        echo "usage: share-dnd start|stop" >&2
+        exit 1
+        ;;
+esac

@@ -167,6 +167,11 @@ hl.on("hyprland.start", function()
         end
         os.remove(state_file)
     end
+    os.remove(util.state_dir .. "/share-dnd")
+end)
+
+hl.on("screenshare.state", function(active)
+    hl.exec_cmd("share-dnd " .. (active and "start" or "stop"))
 end)
 
 --------------------------------------------------------------------------

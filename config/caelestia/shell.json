@@ -764,7 +764,7 @@
             "capsLockChanged": false,
             "chargingChanged": true,
             "configLoaded": true,
-            "dndChanged": true,
+            "dndChanged": false,
             "fullscreen": "off",
             "gameModeChanged": true,
             "kbLayoutChanged": false,
