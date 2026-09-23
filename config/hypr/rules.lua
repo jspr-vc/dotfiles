@@ -109,7 +109,8 @@ local protected = {
         name = "secret-files",
         match = {
             title = "^((sudo )?(n?vim?|nano|hx|cat|bat|less|head|tail) .*"
-                .. "(\\.env|\\.pem|\\.key|id_(rsa|ecdsa|ed25519)|credentials|\\.npmrc|\\.netrc|\\.pgpass|\\.tfvars|secrets?\\.).*)$",
+                .. "(\\.env|\\.pem|\\.key|id_(rsa|ecdsa|ed25519)|credentials"
+                .. "|\\.npmrc|\\.netrc|\\.pgpass|\\.tfvars|secrets?\\.).*)$",
         },
     },
     { name = "zen-private", match = { title = "^(.*Zen Browser Private Browsing)$" } },
