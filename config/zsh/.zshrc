@@ -1,7 +1,7 @@
 # Plain zsh. Plugins come from pacman, the prompt from starship.
 
 # Completion
-fpath=(/usr/share/zsh/site-functions ~/.stripe $fpath)
+fpath=("$ZDOTDIR/completions" /usr/share/zsh/site-functions ~/.stripe $fpath)
 autoload -Uz compinit
 compinit -i -d "$ZDOTDIR/.zcompdump"
 zstyle ':completion:*' menu select
