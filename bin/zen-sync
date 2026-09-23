@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Sync Zen's mods and keyboard shortcuts between the default profile and the
+# dotfiles, no Zen account involved. Zen saves these by writing a new file and
+# renaming it over the old one, which would replace a symlink, so they are
+# copied instead. user.js is only ever read by Zen, so it stays a symlink.
+#
+#   zen-sync pull   profile -> dotfiles, after changing mods or shortcuts in Zen
+#   zen-sync push   dotfiles -> profile, Zen must be closed
+
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$HOME/dotfiles}"
+repo="$DOTFILES/zen/profile"
+zen_root="$HOME/.zen"
+files=(zen-themes.json zen-keyboard-shortcuts.json chrome)
+
+die() { printf 'zen-sync: %s\n' "$*" >&2; exit 1; }
+
+# The profile the installed Zen opens by default, from installs.ini, falling
+# back to the Default=1 profile in profiles.ini.
+profile_dir() {
+    local rel=""
+    [ -f "$zen_root/installs.ini" ] && rel=$(sed -n 's/^Default=//p' "$zen_root/installs.ini" | head -n1)
+    if [ -z "$rel" ] && [ -f "$zen_root/profiles.ini" ]; then
+        rel=$(awk -F= '/^\[Profile/ { path = "" } /^Path=/ { path = $2 } /^Default=1/ && path { print path; exit }' "$zen_root/profiles.ini")
+    fi
+    [ -n "$rel" ] && [ -d "$zen_root/$rel" ] || return 1
+    printf '%s\n' "$zen_root/$rel"
+}
+
+profile=$(profile_dir) || die "no Zen profile yet, open Zen once and rerun"
+
+case "${1:-}" in
+    pull)
+        mkdir -p "$repo"
+        for f in "${files[@]}"; do
+            [ -e "$profile/$f" ] || continue
+            rm -rf "${repo:?}/$f"
+            cp -r "$profile/$f" "$repo/$f"
+        done
+        echo "pulled from $profile"
+        ;;
+    push)
+        pgrep -x zen-bin >/dev/null && die "close Zen first, it overwrites these on exit"
+        for f in "${files[@]}"; do
+            [ -e "$repo/$f" ] || continue
+            rm -rf "${profile:?}/$f"
+            cp -r "$repo/$f" "$profile/$f"
+        done
+        ln -sfn "$DOTFILES/zen/user.js" "$profile/user.js"
+        echo "pushed to $profile"
+        ;;
+    *)
+        die "usage: zen-sync pull|push"
+        ;;
+esac

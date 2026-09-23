@@ -14,9 +14,10 @@ config/      symlinked to ~/.config/<name>
   hypr/      hyprland.lua entry; env, options, scheme, rules, binds, autostart; devices/<hostname>.lua last
   caelestia/ shell.json, cli.json (scheme postHook), custom schemes, user templates
   ghostty/ fuzzel/ gh-dash/ zsh/ tmux/ satty/ zathura/ MangoHud/ gtk-3.0/ xsettingsd/ xdg-desktop-portal/ starship.toml, electron and app flag files, dolphinrc kdeglobals baloofilerc
-bin/         symlinked to ~/.local/bin: audio-pick bt-pick win-pick keys-hint idle-suspend screenshot screenshot-unblocked swappy (satty shim) sddm-sync qt-sync game-mode clip-menu ocr idle-inhibit status-tray note kill-pick
+bin/         symlinked to ~/.local/bin: audio-pick bt-pick win-pick keys-hint idle-suspend screenshot screenshot-unblocked swappy (satty shim) sddm-sync qt-sync game-mode clip-menu ocr idle-inhibit status-tray note kill-pick zen-sync
 home/        symlinked to ~ (.zshenv)
 sddm/        the login theme, copied to /usr/share/sddm/themes/caelestia
+zen/         Zen without an account: policies.json (extensions, search) to /etc/zen/policies, user.js linked and profile/ (mods, shortcuts) copied by bin/zen-sync
 system/      root-installed helpers: xorg-primary-gpu and its unit, copied by install/gpu.sh
 packages/    desktop.ts, apps.ts, <hostname>.ts: typed { group: { package: "reason" } }
 install/     one file per install step
@@ -32,7 +33,7 @@ cd ~/dotfiles
 ./install.sh
 ```
 
-Steps, in order: `bootstrap`, `packages`, `dotfiles`, `services`, `theming`, `sddm`, `caelestia`, `gpu`, `extras`.
+Steps, in order: `bootstrap`, `packages`, `dotfiles`, `services`, `theming`, `sddm`, `caelestia`, `zen`, `gpu`, `extras`.
 Run one with `--only <step>`, drop one with `--skip <step>`. Every step is safe to run again.
 Anything the symlinks displace goes to `~/.dotfiles-backup/<timestamp>/`.
 

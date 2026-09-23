@@ -1,0 +1,59 @@
+{
+  "policies": {
+    "DisableAppUpdate": true,
+    "DefaultSerialGuardSetting": 3,
+    "ExtensionSettings": {
+      "{d634138d-c276-4fc8-924b-40a0ea21d284}": {
+        "installation_mode": "normal_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/1password-x-password-manager/latest.xpi",
+        "private_browsing": true
+      },
+      "uBlock0@raymondhill.net": {
+        "installation_mode": "normal_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi",
+        "private_browsing": true
+      },
+      "{d7742d87-e61d-4b78-b8a1-b469842139fa}": {
+        "installation_mode": "normal_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/vimium-ff/latest.xpi",
+        "private_browsing": true
+      },
+      "{a4c4eda4-fb84-4a84-b4a1-f7c1cbf2a1ad}": {
+        "installation_mode": "normal_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/refined-github-/latest.xpi"
+      },
+      "enhancerforyoutube@maximerf.addons.mozilla.org": {
+        "installation_mode": "normal_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/enhancer-for-youtube/latest.xpi",
+        "private_browsing": true
+      },
+      "{762f9885-5a13-4abd-9c77-433dcd38b8fd}": {
+        "installation_mode": "normal_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/return-youtube-dislikes/latest.xpi"
+      },
+      "moz-addon-prod@7tv.app": {
+        "installation_mode": "normal_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/7tv-extension/latest.xpi",
+        "private_browsing": true
+      }
+    },
+    "SearchEngines": {
+      "Add": [
+        {
+          "Name": "Claude",
+          "URLTemplate": "https://claude.ai/new?q={searchTerms}",
+          "Alias": "!c",
+          "IconURL": "https://claude.ai/favicon.ico"
+        },
+        {
+          "Name": "Claude Incognito",
+          "URLTemplate": "https://claude.ai/new?incognito=true&q={searchTerms}",
+          "Alias": "!ci",
+          "IconURL": "https://claude.ai/favicon.ico"
+        }
+      ],
+      "Default": "DuckDuckGo",
+      "Remove": ["Bing", "Perplexity"]
+    }
+  }
+}
