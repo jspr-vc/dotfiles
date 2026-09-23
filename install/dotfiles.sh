@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Symlink the repo into place. config/* -> ~/.config/*, bin/* -> ~/.local/bin/*,
-# home/* -> ~/*. Anything in the way is moved to the backup dir first.
+# home/* -> ~/*, ssh/config -> ~/.ssh/config. Anything in the way is moved to
+# the backup dir first.
 
 step "dotfiles"
 
@@ -18,6 +19,11 @@ for src in "${DOTFILES}"/home/.[!.]* "${DOTFILES}"/home/*; do
     [ -e "$src" ] || continue
     link "$src" "${HOME}/$(basename "$src")"
 done
+
+mkdir -p "${HOME}/.ssh"
+chmod 700 "${HOME}/.ssh"
+link "${DOTFILES}/ssh/config" "${HOME}/.ssh/config"
+touch "${HOME}/.ssh/config.local"
 
 mkdir -p "${HOME}/.local/state/hypr"
 

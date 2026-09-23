@@ -1,0 +1,5 @@
+# Per-machine hosts go in ~/.ssh/config.local, which is not synced.
+Include config.local
+
+Host *
+  IdentityAgent ~/.1password/agent.sock
