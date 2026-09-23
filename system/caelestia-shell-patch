@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Apply the shell patches in PATCH_DIR to the packaged Caelestia shell. Run as
+# root by install/caelestia.sh and by a pacman hook after every caelestia-shell
+# upgrade. Already-applied patches are skipped. A patch that no longer applies
+# is reported and skipped, leaving that file stock rather than half-patched.
+#
+#   caelestia-shell-patch PATCH_DIR [SHELL_DIR]
+
+set -uo pipefail
+
+patch_dir="${1:?usage: caelestia-shell-patch PATCH_DIR [SHELL_DIR]}"
+shell_dir="${2:-/etc/xdg/quickshell/caelestia}"
+status=0
+
+for p in "$patch_dir"/*.patch; do
+    [ -e "$p" ] || continue
+    name=$(basename "$p")
+    if patch -d "$shell_dir" -p1 -R --dry-run -s -f -r - <"$p" >/dev/null 2>&1; then
+        echo "caelestia patch already applied: $name"
+    elif patch -d "$shell_dir" -p1 --dry-run -s -f -r - <"$p" >/dev/null 2>&1; then
+        patch -d "$shell_dir" -p1 -s -f -r - --no-backup-if-mismatch <"$p" >/dev/null
+        echo "caelestia patch applied: $name"
+    else
+        echo "caelestia patch NO LONGER APPLIES, skipped: $name" >&2
+        status=1
+    fi
+done
+
+exit "$status"

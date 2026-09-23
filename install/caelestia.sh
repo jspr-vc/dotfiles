@@ -34,6 +34,33 @@ HOOK
 info "pacman hook written to $hook"
 fi
 
+# Shell customisations are patches on the packaged shell in /etc/xdg rather
+# than a copy in ~/.config/quickshell, so the QML always matches the installed
+# caelestia-shell. The hook re-applies them after every upgrade.
+patches="${DOTFILES}/config/caelestia/shell-patches"
+patcher="${DOTFILES}/system/caelestia-shell-patch"
+sudo "$patcher" "$patches" || warn "a shell patch no longer applies; update it in $patches"
+
+sudo tee /etc/pacman.d/hooks/caelestia-shell-patches.hook >/dev/null <<HOOK
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = caelestia-shell
+
+[Action]
+Description = Applying caelestia shell patches
+Depends = patch
+When = PostTransaction
+Exec = ${patcher} ${patches}
+HOOK
+info "pacman hook written to /etc/pacman.d/hooks/caelestia-shell-patches.hook"
+
+# A config in ~/.config/quickshell shadows the patched package entirely
+if [ -e "${HOME}/.config/quickshell/caelestia" ]; then
+    warn "${HOME}/.config/quickshell/caelestia overrides the packaged shell and its patches; move it away"
+fi
+
 # User templates (config/caelestia/templates) render into
 # ~/.local/state/caelestia/theme only on a scheme change, and configs such as
 # ghostty's point straight at the rendered files. Re-apply the current scheme

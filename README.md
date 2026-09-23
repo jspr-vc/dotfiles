@@ -12,13 +12,13 @@ Two machines, selected by hostname:
 ```
 config/      symlinked to ~/.config/<name>
   hypr/      hyprland.lua entry; env, options, scheme, rules, binds, autostart; devices/<hostname>.lua last
-  caelestia/ shell.json, cli.json (scheme postHook), custom schemes, user templates
+  caelestia/ shell.json, cli.json (scheme postHook), custom schemes, user templates, shell-patches/ applied to the packaged shell
   ghostty/ fuzzel/ gh-dash/ zsh/ tmux/ satty/ zathura/ MangoHud/ gtk-3.0/ xsettingsd/ xdg-desktop-portal/ starship.toml, electron and app flag files, dolphinrc kdeglobals baloofilerc
 bin/         symlinked to ~/.local/bin: audio-pick bt-pick win-pick keys-hint idle-suspend screenshot screenshot-unblocked swappy (satty shim) sddm-sync qt-sync game-mode clip-menu ocr idle-inhibit status-tray note kill-pick zen-sync
 home/        symlinked to ~ (.zshenv)
 sddm/        the login theme, copied to /usr/share/sddm/themes/caelestia
 zen/         Zen without an account: policies.json (extensions, search) to /etc/zen/policies, user.js linked and profile/ (mods, shortcuts) copied by bin/zen-sync
-system/      root-installed helpers: xorg-primary-gpu and its unit, copied by install/gpu.sh
+system/      root-run helpers: xorg-primary-gpu and its unit (install/gpu.sh), caelestia-shell-patch (install/caelestia.sh and a pacman hook)
 packages/    desktop.ts, apps.ts, <hostname>.ts: typed { group: { package: "reason" } }
 install/     one file per install step
 docs/adr/    decisions worth remembering

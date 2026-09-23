@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jasper Concepcion <jasper@jspr.vc>
+Date: Thu, 24 Sep 2026 00:02:18 +0800
+Subject: [PATCH 3/3] feat: toggle the launcher on key press
+
+---
+ modules/Shortcuts.qml | 12 +++++-------
+ 1 file changed, 5 insertions(+), 7 deletions(-)
+
+diff --git a/modules/Shortcuts.qml b/modules/Shortcuts.qml
+index 4231a26..f00bd41 100644
+--- a/modules/Shortcuts.qml
++++ b/modules/Shortcuts.qml
+@@ -64,13 +64,11 @@ Scope {
+         // qmllint enable unresolved-type
+         name: "launcher"
+         description: "Toggle launcher"
+-        onPressed: root.launcherInterrupted = false
+-        onReleased: {
+-            if (!root.launcherInterrupted && !root.hasFullscreen) {
+-                const screenState = ShellState.forActive();
+-                screenState.launcher = !screenState.launcher;
+-            }
+-            root.launcherInterrupted = false;
++        onPressed: {
++            if (root.hasFullscreen)
++                return;
++            const screenState = ShellState.forActive();
++            screenState.launcher = !screenState.launcher;
+         }
+     }
+ 
