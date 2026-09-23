@@ -324,7 +324,7 @@
             "label": "  ",
             "occupiedBg": false,
             "occupiedLabel": "󰮯",
-            "perMonitorWorkspaces": true,
+            "perMonitor": true,
             "showWindows": false,
             "shown": 5,
             "specialWorkspaceIcons": [
@@ -685,9 +685,9 @@
             }
         ],
         "smartScheme": false,
-        "useFahrenheit": false,
-        "useFahrenheitPerformance": false,
-        "useTwelveHourClock": true,
+        "weatherUnits": "Celsius",
+        "sensorUnits": "Celsius",
+        "clockFormat": "TwelveHour",
         "visualiserBars": 50,
         "weatherLocation": "Manila"
     },
