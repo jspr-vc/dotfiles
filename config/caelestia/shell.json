@@ -774,28 +774,28 @@
             "vpnChanged": true
         },
         "vpn": {
-            "enabled": false,
+            "enabled": true,
             "provider": [
                 {
                     "connectCmd": [
                         "nmcli",
                         "connection",
                         "up",
-                        "sg-sin-wg-001"
+                        "sg-sin"
                     ],
                     "disconnectCmd": [
                         "nmcli",
                         "connection",
                         "down",
-                        "sg-sin-wg-001"
+                        "sg-sin"
                     ],
-                    "displayName": "Singapore (sg-sin-wg-001)",
-                    "id": "vpn-sg-sin-wg-001",
-                    "interface": "sg-sin-wg-001",
+                    "displayName": "Singapore",
+                    "id": "vpn-sg-sin",
+                    "interface": "sg-sin",
                     "name": "wireguard"
                 }
             ],
-            "selectedProvider": "vpn-sg-sin-wg-001"
+            "selectedProvider": "vpn-sg-sin"
         }
     }
 }
