@@ -329,13 +329,17 @@
             "shown": 5,
             "specialWorkspaceIcons": [
                 {
+                    "flags": "",
                     "icon": "sports_esports",
-                    "name": "steam"
+                    "name": "steam",
+                    "regex": ""
                 }
             ],
             "windowIcons": [
                 {
+                    "flags": "",
                     "icon": "sports_esports",
+                    "name": "",
                     "regex": "steam(_app_(default|[0-9]+))?"
                 }
             ]
@@ -377,12 +381,14 @@
             "criticalLevel": 3,
             "warnLevels": [
                 {
+                    "critical": false,
                     "icon": "battery_android_frame_2",
                     "level": 20,
                     "message": "You might want to plug in a charger",
                     "title": "Low battery"
                 },
                 {
+                    "critical": false,
                     "icon": "battery_android_frame_1",
                     "level": 10,
                     "message": "You should probably plug in a charger <b>now</b>",
@@ -402,12 +408,16 @@
             "lockBeforeSleep": true,
             "timeouts": [
                 {
+                    "enabled": true,
                     "idleAction": [
                         "brightnessctl",
                         "-s",
                         "set",
                         "1%"
                     ],
+                    "inhibitWhenAudio": false,
+                    "inhibitWhenCharging": false,
+                    "respectInhibitors": true,
                     "returnAction": [
                         "brightnessctl",
                         "-r"
@@ -415,13 +425,21 @@
                     "timeout": 1800
                 },
                 {
+                    "enabled": true,
                     "idleAction": "lock",
+                    "inhibitWhenAudio": false,
+                    "inhibitWhenCharging": false,
+                    "respectInhibitors": true,
                     "timeout": 1860
                 },
                 {
+                    "enabled": true,
                     "idleAction": [
                         "idle-suspend"
                     ],
+                    "inhibitWhenAudio": false,
+                    "inhibitWhenCharging": false,
+                    "respectInhibitors": true,
                     "timeout": 2040
                 }
             ]
@@ -675,6 +693,7 @@
     "services": {
         "audioIncrement": 0.1,
         "brightnessIncrement": 0.1,
+        "clockFormat": "TwelveHour",
         "defaultPlayer": "Spotify",
         "gpuType": "Auto",
         "maxVolume": 1,
@@ -684,12 +703,11 @@
                 "to": "YT Music"
             }
         ],
-        "smartScheme": false,
-        "weatherUnits": "Celsius",
         "sensorUnits": "Celsius",
-        "clockFormat": "TwelveHour",
+        "smartScheme": false,
         "visualiserBars": 50,
-        "weatherLocation": "Manila"
+        "weatherLocation": "Manila",
+        "weatherUnits": "Celsius"
     },
     "session": {
         "commands": {
