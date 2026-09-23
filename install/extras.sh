@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tooling that lives outside pacman: tmux plugins, node, neovim, git pager, bat theme.
+# Tooling that lives outside pacman: tmux plugins, node, neovim.
 
 step "extras"
 
@@ -46,22 +46,4 @@ if pkg_installed bob; then
             git -C "${HOME}/.config/nvim" remote set-url origin git@github.com:Manokii/nvchad.git
         fi
     fi
-fi
-
-if pkg_installed git-delta; then
-    git config --global core.pager delta
-    git config --global interactive.diffFilter "delta --color-only"
-    git config --global delta.navigate true
-    git config --global delta.line-numbers true
-    git config --global merge.conflictstyle diff3
-    git config --global diff.colorMoved default
-    info "git configured for delta"
-fi
-
-if pkg_installed bat; then
-    bat_dir="$(bat --config-dir)/themes"
-    mkdir -p "$bat_dir"
-    curl -fsSL "https://raw.githubusercontent.com/catppuccin/bat/refs/heads/main/themes/Catppuccin%20Latte.tmTheme" -o "$bat_dir/catpuccin_latte.tmTheme"
-    bat cache --build >/dev/null
-    info "bat theme catppuccin latte installed"
 fi

@@ -54,7 +54,6 @@ typeset -U path
 
 # Environment
 export EDITOR='nvim'
-export BAT_THEME='catpuccin_latte'
 export SSH_AUTH_SOCK=~/.1password/agent.sock
 export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
