@@ -3,7 +3,10 @@
 
 step "services"
 
-for svc in sddm bluetooth NetworkManager power-profiles-daemon; do
+system_services=(sddm bluetooth NetworkManager power-profiles-daemon)
+pkg_installed mullvad-vpn && system_services+=(mullvad-daemon)
+
+for svc in "${system_services[@]}"; do
     if systemctl is-enabled "$svc" &>/dev/null; then
         info "$svc already enabled"
     else
@@ -11,6 +14,12 @@ for svc in sddm bluetooth NetworkManager power-profiles-daemon; do
         info "enabled $svc"
     fi
 done
+
+# zram-generator does nothing without a config.
+if pkg_installed zram-generator && [ ! -f /etc/systemd/zram-generator.conf ]; then
+    printf '[zram0]\n' | sudo tee /etc/systemd/zram-generator.conf >/dev/null
+    info "zram0 configured, active after reboot"
+fi
 
 for svc in pipewire pipewire-pulse wireplumber; do
     if systemctl --user is-enabled "$svc" &>/dev/null; then

@@ -6,6 +6,14 @@
 
 step "bootstrap"
 
+# steam and the lib32 GPU drivers live in multilib, which a plain install leaves
+# commented out. A new repo needs a full -Syu, not just -Sy.
+if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
+    info "enabling multilib"
+    sudo sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf
+    sudo pacman -Syu --noconfirm
+fi
+
 # No -y: refreshing the sync database without upgrading invites a partial
 # upgrade. A 404 here means the database is stale; that is the cue for a
 # deliberate `sudo pacman -Syu`, not something to do silently.
