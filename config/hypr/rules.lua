@@ -101,9 +101,20 @@ local protected = {
     { name = "polkit-agent", match = { class = "^(hyprpolkitagent)$" } },
     { name = "discord", match = { class = "^(discord)$" } },
     { name = "slack", match = { class = "^(Slack)$" } },
+    { name = "viber", match = { class = "^(ViberPC|viber)$" } },
+    { name = "thunderbird", match = { class = "^(thunderbird|org.mozilla.Thunderbird)$" } },
     { name = "obs", match = { class = "^(com.obsproject.Studio)$" } },
-    { name = "env-files", match = { title = "^(nvim .*\\.env.*)$" } },
+    -- Ghostty titles a terminal with the typed command line while it runs
+    {
+        name = "secret-files",
+        match = {
+            title = "^((sudo )?(n?vim?|nano|hx|cat|bat|less|head|tail) .*"
+                .. "(\\.env|\\.pem|\\.key|id_(rsa|ecdsa|ed25519)|credentials|\\.npmrc|\\.netrc|\\.pgpass|\\.tfvars|secrets?\\.).*)$",
+        },
+    },
     { name = "zen-private", match = { title = "^(.*Zen Browser Private Browsing)$" } },
+    { name = "firefox-private", match = { title = "^(.*Mozilla Firefox Private Browsing)$" } },
+    { name = "zen-mail", match = { class = "^(zen)$", title = "^(.*\\b(Gmail|Mail)\\b.* — Zen Browser)$" } },
     { name = "steam", match = { class = "^(steam)$" } },
 }
 
