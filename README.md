@@ -42,7 +42,7 @@ The installer never refreshes the package database on its own, so it cannot caus
 
 Before the `dotfiles` step, sign in to 1Password and turn on Settings > Developer > Use the SSH agent. The step asks for your git name and email, then lists the agent's keys so you can pick the one that signs commits. Without the agent, commits stay unsigned until you rerun `--only dotfiles`.
 
-`boot` turns on the fallback initramfs, updates systemd-boot on the ESP and enables `systemd-boot-update.service`. It does nothing on a machine without systemd-boot.
+`boot` turns on the fallback initramfs, sets systemd-boot to default to the last picked entry, updates systemd-boot on the ESP and enables `systemd-boot-update.service`. It does nothing on a machine without systemd-boot.
 
 `gpu` edits `/etc/mkinitcpio.conf` and rebuilds the initramfs when it changes something. Reboot after.
 It also installs `xorg-primary-gpu.service`, which pins SDDM's Xorg to the GPU that has monitors attached on every boot (docs/adr/0003).

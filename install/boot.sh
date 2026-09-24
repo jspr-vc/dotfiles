@@ -35,6 +35,17 @@ if [ "$rebuild_initramfs" -eq 1 ]; then
     sudo mkinitcpio -P
 fi
 
+loader_conf="$(sudo bootctl -p)/loader/loader.conf"
+if sudo grep -q '^default @saved$' "$loader_conf"; then
+    info "loader.conf already defaults to the last picked entry"
+elif sudo grep -q '^default ' "$loader_conf"; then
+    sudo sed -i 's/^default .*/default @saved/' "$loader_conf"
+    info "set loader.conf default to @saved"
+else
+    echo "default @saved" | sudo tee -a "$loader_conf" >/dev/null
+    info "set loader.conf default to @saved"
+fi
+
 # --graceful: exit 0 when the ESP already has this version or newer.
 sudo bootctl update --graceful
 
