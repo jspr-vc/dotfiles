@@ -68,7 +68,6 @@ export default {
     fnm: "node version manager, set up in .zshrc and install/extras.sh",
     bob: "neovim version manager, install/extras.sh",
     "git-delta": "git diff pager, configured in install/extras.sh",
-    tlrc: "tldr pages",
     lazygit: "git TUI",
     lazydocker: "docker TUI behind the ld alias",
     "gh-dash": "PR and issue dashboard behind the ghd alias, config/gh-dash",
