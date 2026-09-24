@@ -39,8 +39,7 @@ if [ -t 0 ]; then
     if [ -z "$(git config --file "$git_local" user.signingkey)" ]; then
         mapfile -t keys < <(SSH_AUTH_SOCK="${HOME}/.1password/agent.sock" ssh-add -L 2>/dev/null | grep '^ssh-')
         if [ ${#keys[@]} -eq 0 ]; then
-            warn "no keys in the 1Password SSH agent, commit signing left off"
-            info "enable Settings > Developer > Use the SSH agent, unlock 1Password, then rerun --only dotfiles"
+            warn "commit signing is off: turn on 1Password's SSH agent (Settings > Developer), unlock it, then rerun --only dotfiles"
         else
             info "signing key from 1Password:"
             PS3="    number to use, anything else skips: "

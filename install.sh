@@ -60,3 +60,8 @@ info "ran:     ${ran[*]:-none}"
 info "skipped: ${skipped[*]:-none}"
 [ -d "$BACKUP_DIR" ] && info "backups: $BACKUP_DIR"
 info "log out and pick Hyprland in SDDM to start the new session"
+
+if [ ${#TODO[@]} -gt 0 ]; then
+    step "still to do"
+    for t in "${TODO[@]}"; do info "$t"; done
+fi

@@ -10,9 +10,14 @@ BUN_VERSION="1.4.2"
 BUN="${BUN_INSTALL:-${HOME}/.bun}/bin/bun"
 export DOTFILES BACKUP_ROOT BACKUP_DIR BUN BUN_VERSION
 
-step() { printf '\n==> %s\n' "$*"; }
+# Warnings are replayed by install.sh at the end as the still to do list.
+TODO=()
+step() { CURRENT_STEP="$*"; printf '\n==> %s\n' "$*"; }
 info() { printf '    %s\n' "$*"; }
-warn() { printf '    warning: %s\n' "$*" >&2; }
+warn() {
+    printf '    warning: %s\n' "$*" >&2
+    TODO+=("${CURRENT_STEP:-install}: $*")
+}
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
 pkg_installed() { pacman -Q "$1" &>/dev/null; }
