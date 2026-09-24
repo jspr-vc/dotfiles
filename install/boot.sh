@@ -36,15 +36,25 @@ if [ "$rebuild_initramfs" -eq 1 ]; then
 fi
 
 loader_conf="$(sudo bootctl -p)/loader/loader.conf"
-if sudo grep -q '^default @saved$' "$loader_conf"; then
-    info "loader.conf already defaults to the last picked entry"
-elif sudo grep -q '^default ' "$loader_conf"; then
-    sudo sed -i 's/^default .*/default @saved/' "$loader_conf"
-    info "set loader.conf default to @saved"
-else
-    echo "default @saved" | sudo tee -a "$loader_conf" >/dev/null
-    info "set loader.conf default to @saved"
-fi
+
+# Replaces the key's line, commented out or not, or appends one.
+set_loader_option() {
+    local key="$1" value="$2"
+    if sudo grep -q "^$key $value$" "$loader_conf"; then
+        info "loader.conf already has $key $value"
+        return
+    fi
+    if sudo grep -q "^#\?$key " "$loader_conf"; then
+        sudo sed -i "0,/^#\?$key .*/s//$key $value/" "$loader_conf"
+    else
+        echo "$key $value" | sudo tee -a "$loader_conf" >/dev/null
+    fi
+    info "set loader.conf $key to $value"
+}
+
+# @saved boots whichever entry was picked last.
+set_loader_option default @saved
+set_loader_option console-mode max
 
 # --graceful: exit 0 when the ESP already has this version or newer.
 sudo bootctl update --graceful
