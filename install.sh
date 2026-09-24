@@ -13,7 +13,7 @@ export DOTFILES
 # shellcheck source=install/lib.sh
 source "${DOTFILES}/install/lib.sh"
 
-STEPS=(bootstrap packages dotfiles services theming sddm caelestia zen gpu extras)
+STEPS=(bootstrap packages dotfiles services theming sddm caelestia zen boot gpu extras)
 only=()
 skip=()
 

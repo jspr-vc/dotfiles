@@ -34,13 +34,15 @@ cd ~/dotfiles
 ./install.sh
 ```
 
-Steps, in order: `bootstrap`, `packages`, `dotfiles`, `services`, `theming`, `sddm`, `caelestia`, `zen`, `gpu`, `extras`.
+Steps, in order: `bootstrap`, `packages`, `dotfiles`, `services`, `theming`, `sddm`, `caelestia`, `zen`, `boot`, `gpu`, `extras`.
 Run one with `--only <step>`, drop one with `--skip <step>`. Every step is safe to run again.
 Anything the symlinks displace goes to `~/.dotfiles-backup/<timestamp>/`.
 
 The installer never refreshes the package database on its own, so it cannot cause a partial upgrade. If a download 404s because the database is stale, run `sudo pacman -Syu` yourself and rerun the step.
 
 Before the `dotfiles` step, sign in to 1Password and turn on Settings > Developer > Use the SSH agent. The step asks for your git name and email, then lists the agent's keys so you can pick the one that signs commits. Without the agent, commits stay unsigned until you rerun `--only dotfiles`.
+
+`boot` turns on the fallback initramfs, updates systemd-boot on the ESP and enables `systemd-boot-update.service`. It does nothing on a machine without systemd-boot.
 
 `gpu` edits `/etc/mkinitcpio.conf` and rebuilds the initramfs when it changes something. Reboot after.
 It also installs `xorg-primary-gpu.service`, which pins SDDM's Xorg to the GPU that has monitors attached on every boot (docs/adr/0003).
