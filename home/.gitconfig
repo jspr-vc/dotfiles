@@ -1,7 +1,3 @@
-[user]
-	email = jasper@jspr.vc
-	name = Jasper Concepcion
-	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAgOfzfxTsNr3baaOsQgF8je7wrZcURi40PGL9zgUvLv
 [core]
 	pager = delta
 [interactive]
@@ -18,9 +14,10 @@
 	format = ssh
 [gpg "ssh"]
 	program = /opt/1Password/op-ssh-sign
-[commit]
-	gpgsign = true
 [push]
 	autoSetupRemote = true
 [rerere]
 	enabled = true
+# Identity, signing key and commit.gpgsign live here, filled in by install/dotfiles.sh.
+[include]
+	path = ~/.gitconfig.local

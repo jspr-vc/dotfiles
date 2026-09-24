@@ -25,6 +25,35 @@ chmod 700 "${HOME}/.ssh"
 link "${DOTFILES}/ssh/config" "${HOME}/.ssh/config"
 touch "${HOME}/.ssh/config.local"
 
+# ~/.gitconfig.local holds who you are and which 1Password key signs commits.
+# Asks only for what is missing; without a key, commits stay unsigned.
+git_local="${HOME}/.gitconfig.local"
+touch "$git_local"
+if [ -t 0 ]; then
+    for field in name email; do
+        [ -n "$(git config --file "$git_local" "user.${field}")" ] && continue
+        read -rp "    git user.${field}: " value
+        [ -n "$value" ] && git config --file "$git_local" "user.${field}" "$value"
+    done
+
+    if [ -z "$(git config --file "$git_local" user.signingkey)" ]; then
+        mapfile -t keys < <(SSH_AUTH_SOCK="${HOME}/.1password/agent.sock" ssh-add -L 2>/dev/null | grep '^ssh-')
+        if [ ${#keys[@]} -eq 0 ]; then
+            warn "no keys in the 1Password SSH agent, commit signing left off"
+            info "enable Settings > Developer > Use the SSH agent, unlock 1Password, then rerun --only dotfiles"
+        else
+            info "signing key from 1Password:"
+            PS3="    number to use, anything else skips: "
+            select key in "${keys[@]}"; do break; done
+            if [ -n "${key:-}" ]; then
+                git config --file "$git_local" user.signingkey "$(cut -d' ' -f1,2 <<<"$key")"
+                git config --file "$git_local" commit.gpgsign true
+                info "commit signing on"
+            fi
+        fi
+    fi
+fi
+
 for src in "${DOTFILES}"/claude/*; do
     [ -e "$src" ] || continue
     link "$src" "${HOME}/.claude/$(basename "$src")"
