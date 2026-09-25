@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Symlink the repo into place. config/* -> ~/.config/*, bin/* -> ~/.local/bin/*,
-# home/* -> ~/*, ssh/config -> ~/.ssh/config, claude/* -> ~/.claude/*. Anything in the way is moved to
+# home/* -> ~/*, ssh/config -> ~/.ssh/config, claude/* -> ~/.claude/* (skills one by one). Anything in the way is moved to
 # the backup dir first.
 
 step "dotfiles"
@@ -55,7 +55,14 @@ fi
 
 for src in "${DOTFILES}"/claude/*; do
     [ -e "$src" ] || continue
+    [ "$(basename "$src")" = skills ] && continue
     link "$src" "${HOME}/.claude/$(basename "$src")"
+done
+
+# Per skill, since claude.ai writes its own synced/ into ~/.claude/skills.
+for src in "${DOTFILES}"/claude/skills/*; do
+    [ -e "$src" ] || continue
+    link "$src" "${HOME}/.claude/skills/$(basename "$src")"
 done
 
 mkdir -p "${HOME}/.local/state/hypr"
