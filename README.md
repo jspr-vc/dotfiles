@@ -42,6 +42,8 @@ The installer never refreshes the package database on its own, so it cannot caus
 
 Before the `dotfiles` step, sign in to 1Password and turn on Settings > Developer > Use the SSH agent. The step asks for your git name and email, then lists the agent's keys so you can pick the one that signs commits. Without the agent, commits stay unsigned until you rerun `--only dotfiles`.
 
+`sddm` also installs `system/sddm-xsetup` as SDDM's Xsetup. It makes the main monitor primary and puts the pointer there, so the login prompt has focus on it: the built-in panel on highwind, the LG 4K on seventh-heaven. Other hosts are left alone.
+
 `boot` turns on the fallback initramfs, sets systemd-boot to default to the last picked entry and use the highest menu resolution, updates systemd-boot on the ESP and enables `systemd-boot-update.service`. It does nothing on a machine without systemd-boot.
 
 `gpu` edits `/etc/mkinitcpio.conf` and rebuilds the initramfs when it changes something. Reboot after.

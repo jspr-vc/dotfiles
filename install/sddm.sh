@@ -17,6 +17,12 @@ sudo mkdir -p /etc/sddm.conf.d
 printf '[Theme]\nCurrent=caelestia\n' | sudo tee /etc/sddm.conf.d/zz-caelestia.conf >/dev/null
 info "wrote /etc/sddm.conf.d/zz-caelestia.conf"
 
+# The greeter's focus follows the pointer; this puts it on each machine's
+# main monitor. Replaces the stock Xsetup rather than editing the packaged one.
+sudo install -m 755 "${DOTFILES}/system/sddm-xsetup" /usr/local/bin/sddm-xsetup
+printf '[X11]\nDisplayCommand=/usr/local/bin/sddm-xsetup\n' | sudo tee /etc/sddm.conf.d/xsetup.conf >/dev/null
+info "wrote /etc/sddm.conf.d/xsetup.conf"
+
 if [ -f "${HOME}/.local/state/caelestia/scheme.json" ]; then
     "${DOTFILES}/bin/sddm-sync"
     info "theme synced to the current scheme"
