@@ -46,13 +46,20 @@
     "claude-md-management@claude-plugins-official": true,
     "mattpocock-skills@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
-    "typesafe@typesafe-ai": true
+    "typesafe@typesafe-ai": true,
+    "tw@technical-writing-skills": true
   },
   "extraKnownMarketplaces": {
     "typesafe-ai": {
       "source": {
         "source": "github",
         "repo": "typesafe-ai/skills"
+      }
+    },
+    "technical-writing-skills": {
+      "source": {
+        "source": "github",
+        "repo": "Timonwa/technical-writing-skills"
       }
     }
   },
