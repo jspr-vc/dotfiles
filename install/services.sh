@@ -21,6 +21,14 @@ if pkg_installed zram-generator && [ ! -f /etc/systemd/zram-generator.conf ]; th
     info "zram0 configured, active after reboot"
 fi
 
+# The OBS flatpak can't modprobe from its sandbox, so the host loads v4l2loopback at boot.
+if pkg_installed v4l2loopback-dkms && [ ! -f /etc/modules-load.d/v4l2loopback.conf ]; then
+    printf 'v4l2loopback\n' | sudo tee /etc/modules-load.d/v4l2loopback.conf >/dev/null
+    printf 'options v4l2loopback video_nr=10 card_label="OBS Virtual Camera" exclusive_caps=1\n' |
+        sudo tee /etc/modprobe.d/v4l2loopback.conf >/dev/null
+    info "v4l2loopback configured, active after reboot"
+fi
+
 for svc in pipewire pipewire-pulse wireplumber; do
     if systemctl --user is-enabled "$svc" &>/dev/null; then
         info "$svc (user) already enabled"
