@@ -69,7 +69,7 @@ export default {
     "v4l2loopback-dkms": "virtual camera for the OBS flatpak, loaded at boot by install/services.sh",
     "linux-headers": "dkms builds v4l2loopback, and nvidia-open on highwind, against these",
     fnm: "node version manager, set up in .zshrc and install/extras.sh",
-    bob: "neovim version manager, install/extras.sh",
+    bob: "neovim version manager, install/extras.sh; config in config/nvim",
     "git-delta": "git diff pager, configured in install/extras.sh",
     lazygit: "git TUI",
     lazydocker: "docker TUI behind the ld alias",
