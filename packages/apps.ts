@@ -44,6 +44,7 @@ export default {
     "wireguard-tools": "wg-quick for WireGuard profiles",
     isoimagewriter: "writes ISOs to USB",
     "ventoy-bin": "multi-ISO bootable USB",
+    "localsend-bin": "file and text transfer to phones on the same network",
   },
 
   cli: {
@@ -61,6 +62,7 @@ export default {
     pamixer: "PulseAudio mixer CLI",
     "mesa-utils": "glxinfo for GPU checks",
     "libva-utils": "vainfo for hardware decode checks",
+    "arch-audit": "lists installed packages with known CVEs",
   },
 
   dev: {
@@ -83,6 +85,8 @@ export default {
     pyenv: "python version manager, set up in .zshrc",
     "pyenv-virtualenv": "pyenv virtualenv-init in .zshrc",
     postgresql: "psql client",
+    pgcli: "psql with autocomplete and highlighting",
+    difftastic: "syntax-aware diffs through git difftool, set in home/.gitconfig",
     act: "run GitHub Actions locally",
     ngrok: "tunnels to local servers",
     "postman-bin": "API client",
@@ -101,6 +105,7 @@ export default {
     opentofu: "infrastructure as code",
     "aws-cli-bin": "aws",
     "google-cloud-cli": "gcloud",
+    tflint: "OpenTofu and Terraform linter",
   },
 
   hardware: {
