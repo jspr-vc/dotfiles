@@ -101,7 +101,6 @@ local protected = {
     { name = "polkit-agent", match = { class = "^(hyprpolkitagent)$" } },
     { name = "discord", match = { class = "^(discord)$" } },
     { name = "slack", match = { class = "^(Slack)$" } },
-    { name = "viber", match = { class = "^(ViberPC|viber)$" } },
     { name = "thunderbird", match = { class = "^(thunderbird|org.mozilla.Thunderbird)$" } },
     { name = "obs", match = { class = "^(com.obsproject.Studio)$" } },
     -- Ghostty titles a terminal with the typed command line while it runs

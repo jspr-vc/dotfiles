@@ -18,7 +18,6 @@ x-scheme-handler/webcals=org.mozilla.Thunderbird.desktop
 text/calendar=org.mozilla.Thunderbird.desktop
 application/x-extension-ics=org.mozilla.Thunderbird.desktop
 x-scheme-handler/postman=postman.desktop
-x-scheme-handler/viber=viber.desktop
 x-scheme-handler/claude-cli=claude-code-url-handler.desktop
 x-scheme-handler/slack=slack.desktop
 image/png=org.kde.gwenview.desktop

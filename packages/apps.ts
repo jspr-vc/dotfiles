@@ -37,7 +37,6 @@ export default {
     thunderbird: "mail",
     "libreoffice-fresh": "office suite",
     qbittorrent: "torrents",
-    viber: "chat",
     flatpak: "apps not packaged for Arch",
     "vlc-plugin-ass": "styled subtitles for vlc",
     "mullvad-vpn": "VPN client, daemon enabled in install/services.sh",
