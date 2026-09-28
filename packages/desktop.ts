@@ -44,7 +44,6 @@ export default {
     fuzzel: "dmenu backend for audio-pick, bt-pick, win-pick, keys-hint; themed by caelestia",
     sddm: "login screen, theme in sddm/caelestia",
     "qt6-svg": "SVG icons for the SDDM theme",
-    xdotool: "puts the pointer on the main monitor in system/sddm-xsetup",
   },
 
   audioBluetoothNetwork: {
