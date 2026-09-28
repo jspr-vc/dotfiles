@@ -410,19 +410,17 @@
                 {
                     "enabled": true,
                     "idleAction": [
-                        "brightnessctl",
-                        "-s",
-                        "set",
-                        "1%"
+                        "idle-dim",
+                        "dim"
                     ],
                     "inhibitWhenAudio": false,
                     "inhibitWhenCharging": false,
                     "respectInhibitors": true,
                     "returnAction": [
-                        "brightnessctl",
-                        "-r"
+                        "idle-dim",
+                        "restore"
                     ],
-                    "timeout": 1800
+                    "timeout": 300
                 },
                 {
                     "enabled": true,

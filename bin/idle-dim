@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Dim every screen to 1% on idle, and put the saved brightness back on return.
+# External monitors go through DDC (ddcutil), laptop panels through their backlight (brightnessctl).
+# Usage: idle-dim dim | idle-dim restore
+
+set -euo pipefail
+
+state="${XDG_RUNTIME_DIR:-/tmp}/idle-dim"
+
+# Read buses from sysfs instead of `ddcutil detect`, which scans every bus and takes seconds.
+# DisplayPort exposes its DDC bus under the connector; HDMI links to it as `ddc`.
+# Built-in panels (eDP, LVDS, DSI) have no DDC and are handled as backlights.
+buses() {
+    local connector bus
+    for connector in /sys/class/drm/card*-*; do
+        case "$connector" in *-eDP-* | *-LVDS-* | *-DSI-*) continue ;; esac
+        [ "$(cat "$connector/status" 2>/dev/null)" = connected ] || continue
+        bus=$(compgen -G "$connector/i2c-*" | head -n1 || true)
+        [ -n "$bus" ] || bus=$(readlink -f "$connector/ddc" 2>/dev/null || true)
+        [ -n "$bus" ] && echo "${bus##*i2c-}"
+    done
+}
+
+backlights() {
+    local device
+    for device in /sys/class/backlight/*; do
+        [ -e "$device" ] && basename "$device"
+    done
+}
+
+case "${1:-}" in
+dim)
+    [ -e "$state" ] && exit 0
+    : >"$state.tmp"
+    for bus in $(buses); do
+        level=$(ddcutil --bus "$bus" getvcp 10 --brief 2>/dev/null | awk '{print $4}' || true)
+        [ -n "$level" ] && echo "ddc $bus $level" >>"$state.tmp"
+    done
+    for device in $(backlights); do
+        echo "backlight $device $(brightnessctl -d "$device" get)" >>"$state.tmp"
+    done
+    mv "$state.tmp" "$state"
+    while read -r kind id _; do
+        case "$kind" in
+        ddc) ddcutil --bus "$id" setvcp 10 1 & ;;
+        backlight) brightnessctl -q -d "$id" set 1% & ;;
+        esac
+    done <"$state"
+    wait
+    ;;
+restore)
+    [ -e "$state" ] || exit 0
+    while read -r kind id level; do
+        case "$kind" in
+        ddc) ddcutil --bus "$id" setvcp 10 "$level" & ;;
+        backlight) brightnessctl -q -d "$id" set "$level" & ;;
+        esac
+    done <"$state"
+    wait
+    rm -f "$state"
+    ;;
+*)
+    echo "usage: idle-dim dim|restore" >&2
+    exit 1
+    ;;
+esac
