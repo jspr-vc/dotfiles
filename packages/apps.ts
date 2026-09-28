@@ -70,6 +70,7 @@ export default {
     "linux-headers": "dkms builds v4l2loopback, and nvidia-open on highwind, against these",
     fnm: "node version manager, set up in .zshrc and install/extras.sh",
     bob: "neovim version manager, install/extras.sh; config in config/nvim",
+    "tree-sitter-cli": "builds parsers for nvim-treesitter's main branch",
     "git-delta": "git diff pager, configured in install/extras.sh",
     lazygit: "git TUI",
     lazydocker: "docker TUI behind the ld alias",

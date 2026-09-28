@@ -15,6 +15,9 @@ return {
 
   {
     "nvim-treesitter/nvim-treesitter",
+    -- master is frozen and breaks on nvim 0.12; main doesn't support lazy loading
+    branch = "main",
+    lazy = false,
     opts = {
       ensure_installed = {
         "vim",
@@ -25,6 +28,9 @@ return {
         "tsx",
         "typescript",
         "python",
+        "sql",
+        "terraform",
+        "yaml",
       },
     },
   },
