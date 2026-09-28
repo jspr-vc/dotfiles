@@ -98,7 +98,7 @@ hl.window_rule({ name = "xeneon-edge", match = { title = "^(xeneon-edge)$" }, mo
 local protected = {
     { name = "1password", match = { class = "^(1password)$" } },
     { name = "1password-quick-access", match = { title = "^(Quick Access — 1Password)$" } },
-    { name = "polkit-agent", match = { class = "^(hyprpolkitagent)$" } },
+    { name = "polkit-agent", layer = true, match = { namespace = "^(caelestia-polkit)$" } },
     { name = "discord", match = { class = "^(discord)$" } },
     { name = "slack", match = { class = "^(Slack)$" } },
     { name = "thunderbird", match = { class = "^(thunderbird|org.mozilla.Thunderbird)$" } },
@@ -120,10 +120,11 @@ local protected = {
 
 local state_file = util.state_dir .. "/screenshare-protection"
 
----@type HL.WindowRule[]
+---@type (HL.WindowRule|HL.LayerRule)[]
 local protection_rules = {}
 for _, spec in ipairs(protected) do
-    protection_rules[#protection_rules + 1] = hl.window_rule({
+    local rule = spec.layer and hl.layer_rule or hl.window_rule
+    protection_rules[#protection_rules + 1] = rule({
         name = "noscreenshare-" .. spec.name,
         match = spec.match,
         no_screen_share = true,
@@ -192,7 +193,7 @@ hl.workspace_rule({ workspace = "special:special", gaps_out = 100 })
 
 hl.layer_rule({
     name = "caelestia-static",
-    match = { namespace = "^(caelestia-(border-exclusion|area-picker))$" },
+    match = { namespace = "^(caelestia-(border-exclusion|area-picker|polkit|polkit-scrim))$" },
     no_anim = true,
 })
 hl.layer_rule({

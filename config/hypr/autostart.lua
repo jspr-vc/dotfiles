@@ -14,7 +14,6 @@ hl.on("hyprland.start", function()
             .. "WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP QT_QPA_PLATFORMTHEME"
     )
     hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
-    hl.exec_cmd("systemctl --user start hyprpolkitagent")
 
     -- Cursor for apps that do not read the env
     hl.exec_cmd("hyprctl setcursor " .. env.cursor_theme .. " " .. env.cursor_size)

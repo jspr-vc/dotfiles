@@ -16,7 +16,7 @@ toast() { caelestia shell toaster "$1" "Kill process" "$2" dangerous >/dev/null 
 # wl-copy is whatever is on the clipboard right now.
 # Names are ps's comm, which is cut to 15 characters.
 protected='^(systemd|\(sd-pam\)|start-hyprland|Hyprland|Xwayland|qs|quickshell|caelestia|'\
-'pipewire.*|wireplumber|dbus-.*|xdg-.*|at-spi.*|gnome-keyring-d|hyprpolkitagent|polkit.*|'\
+'pipewire.*|wireplumber|dbus-.*|xdg-.*|at-spi.*|gnome-keyring-d|polkit.*|'\
 'dconf-service|xsettingsd|wl-clip-persist|wl-paste|wl-copy|status-tray|hypridle|hyprsunset|udiskie|'\
 'gvfs.*|ssh-agent|gpg-agent|fuzzel|kill-pick|ps|awk)$'
 

@@ -9,7 +9,6 @@ export default {
     hyprsunset: "night light, profiles in config/hypr/hyprsunset.conf",
     hyprpicker: "colour picker on SUPER+SHIFT+P",
     "hyprland-qt-support": "QML styling shared by the hypr ecosystem tools",
-    hyprpolkitagent: "polkit auth dialogs, started in autostart.lua",
     "python-dbus": "D-Bus bindings for the status-tray icons",
     "python-gobject": "GLib main loop for the status-tray icons",
     "qt5-wayland": "Wayland backend for Qt5 apps",

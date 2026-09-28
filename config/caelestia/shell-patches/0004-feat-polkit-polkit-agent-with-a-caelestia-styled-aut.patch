@@ -1,0 +1,1121 @@
+From ffd09bd3f111f0b0716cb9ed0800e694e0ec977a Mon Sep 17 00:00:00 2001
+From: Jasper Concepcion <jasper@jspr.vc>
+Date: Tue, 29 Sep 2026 02:21:18 +0800
+Subject: [PATCH 4/4] feat(polkit): polkit agent with a caelestia-styled auth
+ dialog
+
+---
+ modules/polkit/AuthDialog.qml    | 645 +++++++++++++++++++++++++++++++
+ modules/polkit/PasswordField.qml | 330 ++++++++++++++++
+ modules/polkit/Polkit.qml        |  89 +++++
+ shell.qml                        |   2 +
+ 4 files changed, 1066 insertions(+)
+ create mode 100644 modules/polkit/AuthDialog.qml
+ create mode 100644 modules/polkit/PasswordField.qml
+ create mode 100644 modules/polkit/Polkit.qml
+
+diff --git a/modules/polkit/AuthDialog.qml b/modules/polkit/AuthDialog.qml
+new file mode 100644
+index 0000000..63bf413
+--- /dev/null
++++ b/modules/polkit/AuthDialog.qml
+@@ -0,0 +1,645 @@
++pragma ComponentBehavior: Bound
++
++import QtQuick
++import QtQuick.Layouts
++import Quickshell.Io
++import Quickshell.Services.Polkit
++import M3Shapes
++import Caelestia.Config
++import Caelestia.I18n
++import qs.components
++import qs.components.controls
++import qs.components.effects
++import qs.services
++
++Item {
++    id: root
++
++    required property AuthFlow flow
++    property bool closing
++
++    // The flow is destroyed the moment it completes, so hold what the
++    // dialog shows while it animates out
++    property string message
++    property string actionId
++    property string userName
++
++    signal closed
++
++    property bool wrongPassword
++    property bool detailsOpen
++    property string vendor
++    property string command
++    property string runAs
++    readonly property bool checking: !!flow && !flow.isResponseRequired && !flow.isCompleted
++    readonly property bool canSubmit: !!flow?.isResponseRequired && !!password.text
++    readonly property int identityCount: flow?.identities.length ?? 0
++
++    function submit(): void {
++        if (!canSubmit)
++            return;
++        wrongPassword = false;
++        flow.submit(password.text);
++        password.clear();
++    }
++
++    onFlowChanged: {
++        if (!flow)
++            return;
++        wrongPassword = false;
++        detailsOpen = false;
++        vendor = "";
++        command = "";
++        runAs = "";
++        actionInfo.exec(["pkaction", "--action-id", flow.actionId, "--verbose"]);
++        if (flow.actionId === "org.freedesktop.policykit.exec")
++            pkexecArgs.running = true;
++    }
++
++    implicitWidth: 500
++    implicitHeight: card.implicitHeight
++
++    // Resizing a layer surface every frame stutters, so the surface jumps
++    // straight to a taller card and only shrinks once the card has
++    readonly property real targetHeight: content.implicitHeight + content.anchors.topMargin + 32
++    property real surfaceHeight
++
++    // The surface is pinned by its top edge so resizes never move the card.
++    // Until the entrance finishes the layout is still settling, so the height
++    // that places the card (centred) follows it; after that it stays put.
++    property bool settled
++    property real restingHeight
++    readonly property real placementHeight: settled ? restingHeight : targetHeight
++
++    onTargetHeightChanged: {
++        if (targetHeight > surfaceHeight)
++            surfaceHeight = targetHeight;
++    }
++
++    scale: 0.95
++    opacity: 0
++    Component.onCompleted: {
++        surfaceHeight = targetHeight;
++        scale = Qt.binding(() => closing ? 0.95 : 1);
++        opacity = Qt.binding(() => closing ? 0 : 1);
++    }
++
++    Behavior on scale {
++        Anim {
++            type: Anim.FastSpatial
++            duration: root.closing ? 150 : 200
++        }
++    }
++
++    Behavior on opacity {
++        Anim {
++            type: Anim.FastEffects
++            duration: root.closing ? 150 : 200
++        }
++    }
++
++    // The easing tail lingers near zero long after it stops being visible
++    onOpacityChanged: {
++        if (closing && opacity < 0.05) {
++            closed();
++        } else if (!closing && !settled && opacity > 0.95) {
++            restingHeight = targetHeight;
++            settled = true;
++        }
++    }
++
++    Binding {
++        when: !!root.flow
++        root.message: root.flow?.message ?? ""
++        root.actionId: root.flow?.actionId ?? ""
++        root.userName: root.flow?.selectedIdentity?.displayName ?? ""
++        restoreMode: Binding.RestoreNone
++    }
++
++    Process {
++        id: actionInfo
++
++        stdout: StdioCollector {
++            onStreamFinished: root.vendor = text.match(/^\s*vendor:\s*(.+)$/m)?.[1].trim() ?? ""
++        }
++    }
++
++    // pkexec is still waiting on us, so the newest one is the requester
++    Process {
++        id: pkexecArgs
++
++        command: ["ps", "-C", "pkexec", "-o", "args=", "--sort=-start_time"]
++        stdout: StdioCollector {
++            onStreamFinished: {
++                const args = text.split("\n")[0].trim().split(/\s+/).slice(1);
++                let user = "root";
++                while (args[0]?.startsWith("--")) {
++                    const opt = args.shift();
++                    if (opt === "--user")
++                        user = args.shift() ?? user;
++                }
++                root.command = args.join(" ");
++                root.runAs = root.command ? user : "";
++            }
++        }
++    }
++
++    Connections {
++        function onAuthenticationFailed(): void {
++            root.wrongPassword = true;
++            password.shake();
++        }
++
++        function onIsResponseRequiredChanged(): void {
++            if (root.flow.isResponseRequired)
++                password.takeFocus();
++        }
++
++        target: root.flow
++    }
++
++    Elevation {
++        anchors.fill: card
++        radius: card.radius
++        level: 4
++    }
++
++    StyledRect {
++        id: card
++
++        anchors.left: parent.left
++        anchors.right: parent.right
++        implicitHeight: root.targetHeight
++        clip: true
++
++        radius: 36
++        color: Colours.palette.m3surfaceContainerHigh
++
++        Behavior on implicitHeight {
++            enabled: root.settled
++
++            Anim {
++                onRunningChanged: {
++                    if (!running)
++                        root.surfaceHeight = root.targetHeight;
++                }
++            }
++        }
++
++        ColumnLayout {
++            id: content
++
++            anchors.left: parent.left
++            anchors.right: parent.right
++            anchors.top: parent.top
++            anchors.topMargin: 40
++            anchors.leftMargin: 32
++            anchors.rightMargin: 32
++            spacing: 28
++
++            ColumnLayout {
++                Layout.fillWidth: true
++                spacing: 18
++
++                Item {
++                    Layout.alignment: Qt.AlignHCenter
++                    implicitWidth: 72
++                    implicitHeight: 72
++
++                    MaterialShape {
++                        id: badge
++
++                        anchors.centerIn: parent
++                        implicitSize: 72
++                        shape: MaterialShape.Cookie9Sided
++                        color: root.wrongPassword ? Colours.palette.m3errorContainer : Colours.palette.m3primaryContainer
++
++                        Behavior on color {
++                            CAnim {}
++                        }
++
++                        RotationAnimation on rotation {
++                            running: root.checking
++                            loops: Animation.Infinite
++                            from: badge.rotation
++                            to: badge.rotation + 360
++                            duration: 1800
++                        }
++                    }
++
++                    MaterialIcon {
++                        anchors.centerIn: parent
++                        text: "lock"
++                        color: root.wrongPassword ? Colours.palette.m3onErrorContainer : Colours.palette.m3onPrimaryContainer
++                        fill: 1
++                        fontStyle: Tokens.font.icon.large
++                    }
++                }
++
++                StyledText {
++                    Layout.fillWidth: true
++                    text: Tr.tr("Authentication required")
++                    font: Tokens.font.headline.builders.small.weight(640).build()
++                    horizontalAlignment: Text.AlignHCenter
++                    wrapMode: Text.WordWrap
++                }
++
++                StyledText {
++                    Layout.alignment: Qt.AlignHCenter
++                    Layout.maximumWidth: 380
++                    text: root.message
++                    color: Colours.palette.m3onSurfaceVariant
++                    font: Tokens.font.body.medium
++                    horizontalAlignment: Text.AlignHCenter
++                    wrapMode: Text.WordWrap
++                }
++            }
++
++            StyledRect {
++                Layout.fillWidth: true
++                implicitHeight: 52
++                radius: Tokens.rounding.full
++                color: Colours.palette.m3surfaceContainerLow
++
++                RowLayout {
++                    anchors.fill: parent
++                    anchors.leftMargin: 16
++                    anchors.rightMargin: 20
++                    spacing: 12
++
++                    MaterialIcon {
++                        text: "terminal"
++                        color: Colours.palette.m3primary
++                        fontStyle: Tokens.font.icon.medium
++                    }
++
++                    StyledText {
++                        Layout.fillWidth: true
++                        text: root.command || root.actionId
++                        font: Tokens.font.mono.small
++                        elide: Text.ElideMiddle
++                    }
++
++                    StyledText {
++                        visible: !!root.runAs
++                        // TRANSLATORS: %1 = the user the program will run as
++                        text: Tr.tr("as %1").arg(root.runAs)
++                        color: Colours.palette.m3onSurfaceVariant
++                        font: Tokens.font.label.medium
++                    }
++                }
++            }
++
++            ColumnLayout {
++                Layout.fillWidth: true
++                spacing: 12
++
++                PasswordField {
++                    id: password
++
++                    Layout.fillWidth: true
++                    label: {
++                        const prompt = (root.flow?.inputPrompt ?? "").replace(/:\s*$/, "");
++                        if (prompt && prompt.toLowerCase() !== "password")
++                            return prompt;
++                        // TRANSLATORS: %1 = the user being authenticated
++                        return Tr.tr("Password for %1").arg(root.userName);
++                    }
++                    error: root.wrongPassword
++                    busy: root.checking
++                    echo: !!root.flow?.responseVisible
++
++                    Component.onCompleted: takeFocus()
++                    onTextChanged: {
++                        if (text)
++                            root.wrongPassword = false;
++                    }
++                    onAccepted: root.submit()
++                    onCancelled: root.flow?.cancelAuthenticationRequest()
++                }
++
++                StyledText {
++                    Layout.fillWidth: true
++                    Layout.leftMargin: 16
++                    Layout.rightMargin: 16
++                    visible: text.length > 0 && !root.checking
++                    text: root.wrongPassword ? Tr.tr("That password didn’t work. Try again.") : root.flow?.supplementaryMessage ?? ""
++                    color: root.wrongPassword || root.flow?.supplementaryIsError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
++                    font: Tokens.font.body.builders.small.weight(Font.Medium).build()
++                    wrapMode: Text.WordWrap
++                }
++
++                ColumnLayout {
++                    Layout.fillWidth: true
++                    Layout.topMargin: 8
++                    Layout.leftMargin: 4
++                    Layout.rightMargin: 4
++                    spacing: 10
++                    visible: root.checking
++
++                    StyledText {
++                        text: Tr.tr("Checking password…")
++                        color: Colours.palette.m3onSurfaceVariant
++                        font: Tokens.font.body.builders.small.weight(Font.Medium).build()
++                    }
++
++                    StyledProgressBar {
++                        Layout.fillWidth: true
++                        implicitHeight: 12
++                        indeterminate: true
++                        wavy: true
++                    }
++                }
++
++                DetailsToggle {
++                    visible: !root.checking
++                }
++
++                DetailsList {
++                    Layout.fillWidth: true
++                    visible: root.detailsOpen && !root.checking
++                }
++
++                StyledText {
++                    Layout.topMargin: 12
++                    Layout.leftMargin: 4
++                    visible: root.detailsOpen && !root.checking && root.identityCount > 1
++                    text: Tr.tr("Authenticate as")
++                    color: Colours.palette.m3onSurfaceVariant
++                    font: Tokens.font.label.large
++                }
++
++                IdentityList {
++                    Layout.fillWidth: true
++                    visible: root.detailsOpen && !root.checking && root.identityCount > 1
++                }
++            }
++
++            RowLayout {
++                id: buttons
++
++                Layout.fillWidth: true
++                Layout.topMargin: 4
++                spacing: 12
++
++                DialogButton {
++                    Layout.preferredWidth: (buttons.width - buttons.spacing) * 0.4
++                    text: Tr.trCtx("Cancel", "button")
++                    bg: Colours.palette.m3secondaryContainer
++                    fg: Colours.palette.m3onSecondaryContainer
++                    radius: height / 2
++                    onClicked: root.flow?.cancelAuthenticationRequest()
++                }
++
++                DialogButton {
++                    Layout.fillWidth: true
++                    text: root.checking ? Tr.tr("Checking") : root.wrongPassword ? Tr.tr("Try again") : Tr.tr("Authenticate")
++                    bg: Colours.palette.m3primary
++                    fg: Colours.palette.m3onPrimary
++                    radius: root.checking ? height / 2 : 16
++                    spinner: root.checking
++                    disabled: !root.canSubmit
++                    onClicked: root.submit()
++                }
++            }
++        }
++    }
++
++    component DetailsToggle: StyledRect {
++        implicitWidth: toggleRow.implicitWidth + 26
++        implicitHeight: 36
++        radius: Tokens.rounding.full
++        color: root.detailsOpen ? Colours.palette.m3secondaryContainer : "transparent"
++
++        RowLayout {
++            id: toggleRow
++
++            anchors.centerIn: parent
++            spacing: 6
++
++            StyledText {
++                text: Tr.tr("Details")
++                color: root.detailsOpen ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3primary
++                font: Tokens.font.label.large
++            }
++
++            MaterialIcon {
++                text: "expand_more"
++                rotation: root.detailsOpen ? 180 : 0
++                color: root.detailsOpen ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3primary
++                fontStyle: Tokens.font.icon.medium
++
++                Behavior on rotation {
++                    Anim {}
++                }
++            }
++        }
++
++        StateLayer {
++            radius: parent.radius
++            onClicked: root.detailsOpen = !root.detailsOpen
++        }
++    }
++
++    component DetailsList: ColumnLayout {
++        id: details
++
++        readonly property var rows: [
++            {
++                label: Tr.tr("Action"),
++                value: root.actionId,
++                mono: true
++            },
++            {
++                label: Tr.tr("Program"),
++                value: root.command,
++                mono: true
++            },
++            {
++                label: Tr.tr("Run as"),
++                value: root.runAs,
++                mono: true
++            },
++            {
++                label: Tr.tr("Vendor"),
++                value: root.vendor,
++                mono: false
++            }
++        ].filter(r => r.value)
++
++        spacing: 3
++
++        Repeater {
++            model: details.rows
++
++            delegate: StyledRect {
++                id: row
++
++                required property var modelData
++                required property int index
++                readonly property real outer: 20
++                readonly property real inner: 6
++
++                Layout.fillWidth: true
++                implicitHeight: rowContent.implicitHeight + 28
++                topLeftRadius: index === 0 ? outer : inner
++                topRightRadius: index === 0 ? outer : inner
++                bottomLeftRadius: index === details.rows.length - 1 ? outer : inner
++                bottomRightRadius: index === details.rows.length - 1 ? outer : inner
++                color: Colours.palette.m3surfaceContainerHighest
++
++                ColumnLayout {
++                    id: rowContent
++
++                    anchors.left: parent.left
++                    anchors.right: parent.right
++                    anchors.verticalCenter: parent.verticalCenter
++                    anchors.leftMargin: 20
++                    anchors.rightMargin: 20
++                    spacing: 4
++
++                    StyledText {
++                        text: row.modelData.label
++                        color: Colours.palette.m3onSurfaceVariant
++                        font: Tokens.font.label.medium
++                    }
++
++                    StyledText {
++                        Layout.fillWidth: true
++                        text: row.modelData.value
++                        font: row.modelData.mono ? Tokens.font.mono.small : Tokens.font.body.medium
++                        wrapMode: Text.WrapAnywhere
++                    }
++                }
++            }
++        }
++    }
++
++    component IdentityList: ColumnLayout {
++        spacing: 3
++
++        Repeater {
++            model: root.flow?.identities ?? []
++
++            delegate: StyledRect {
++                id: identity
++
++                required property var modelData
++                required property int index
++                readonly property bool selected: root.flow?.selectedIdentity === modelData
++                readonly property real outer: 24
++                readonly property real inner: 6
++
++                Layout.fillWidth: true
++                implicitHeight: 72
++                topLeftRadius: index === 0 ? outer : inner
++                topRightRadius: index === 0 ? outer : inner
++                bottomLeftRadius: index === root.identityCount - 1 ? outer : inner
++                bottomRightRadius: index === root.identityCount - 1 ? outer : inner
++                color: selected ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainerHighest
++
++                RowLayout {
++                    anchors.fill: parent
++                    anchors.leftMargin: 16
++                    anchors.rightMargin: 20
++                    spacing: 16
++
++                    StyledRect {
++                        implicitWidth: 40
++                        implicitHeight: 40
++                        radius: identity.selected ? 20 : 12
++                        color: identity.selected ? Colours.palette.m3primaryContainer : Colours.palette.m3tertiaryContainer
++
++                        StyledText {
++                            anchors.centerIn: parent
++                            text: identity.modelData.displayName.charAt(0).toUpperCase()
++                            color: identity.selected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onTertiaryContainer
++                            font: Tokens.font.title.medium
++                        }
++                    }
++
++                    StyledText {
++                        Layout.fillWidth: true
++                        text: identity.modelData.isGroup ? Tr.tr("%1 (group)").arg(identity.modelData.displayName) : identity.modelData.displayName
++                        color: identity.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
++                        font: Tokens.font.title.small
++                        elide: Text.ElideRight
++                    }
++
++                    MaterialIcon {
++                        text: identity.selected ? "radio_button_checked" : "radio_button_unchecked"
++                        color: Colours.palette.m3primary
++                        fontStyle: Tokens.font.icon.medium
++                    }
++                }
++
++                StateLayer {
++                    topLeftRadius: identity.topLeftRadius
++                    topRightRadius: identity.topRightRadius
++                    bottomLeftRadius: identity.bottomLeftRadius
++                    bottomRightRadius: identity.bottomRightRadius
++                    onClicked: {
++                        root.flow.selectedIdentity = identity.modelData;
++                        password.takeFocus();
++                    }
++                }
++            }
++        }
++    }
++
++    component DialogButton: StyledRect {
++        id: button
++
++        property string text
++        property color bg
++        property color fg
++        property bool spinner
++        property bool disabled
++
++        signal clicked
++
++        implicitHeight: 56
++        color: disabled && !spinner ? Qt.alpha(Colours.palette.m3onSurface, 0.1) : bg
++
++        Behavior on radius {
++            Anim {
++                type: Anim.FastSpatial
++            }
++        }
++
++        RowLayout {
++            anchors.centerIn: parent
++            spacing: 10
++
++            MaterialShape {
++                id: spinnerShape
++
++                visible: button.spinner
++                implicitSize: 22
++                shape: MaterialShape.Cookie9Sided
++                color: button.fg
++
++                RotationAnimation on rotation {
++                    running: button.spinner
++                    loops: Animation.Infinite
++                    from: spinnerShape.rotation
++                    to: spinnerShape.rotation + 360
++                    duration: 1800
++                }
++            }
++
++            StyledText {
++                text: button.text
++                color: button.disabled && !button.spinner ? Qt.alpha(Colours.palette.m3onSurface, 0.38) : button.fg
++                font: Tokens.font.title.small
++            }
++        }
++
++        StateLayer {
++            radius: button.radius
++            disabled: button.disabled
++            color: button.fg
++            onClicked: button.clicked()
++        }
++    }
++}
+diff --git a/modules/polkit/PasswordField.qml b/modules/polkit/PasswordField.qml
+new file mode 100644
+index 0000000..6451c44
+--- /dev/null
++++ b/modules/polkit/PasswordField.qml
+@@ -0,0 +1,330 @@
++pragma ComponentBehavior: Bound
++
++import QtQuick
++import QtQuick.Layouts
++import Quickshell
++import M3Shapes
++import Caelestia.Config
++import qs.components
++import qs.services
++
++StyledRect {
++    id: root
++
++    property string label
++    property bool error
++    property bool busy
++    property bool echo
++    readonly property alias text: input.text
++    readonly property list<int> shapeQueue: {
++        const shapes = [MaterialShape.Slanted, MaterialShape.Arch, MaterialShape.Fan, MaterialShape.Arrow, MaterialShape.SemiCircle, MaterialShape.Triangle, MaterialShape.Diamond, MaterialShape.ClamShell, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Sunny, MaterialShape.VerySunny, MaterialShape.Cookie4Sided, MaterialShape.Ghostish, MaterialShape.SoftBurst];
++        for (let i = shapes.length - 1; i > 0; i--) {
++            const j = Math.floor(Math.random() * (i + 1));
++            [shapes[i], shapes[j]] = [shapes[j], shapes[i]];
++        }
++        return shapes;
++    }
++    property bool showPassword
++
++    signal accepted
++    signal cancelled
++
++    function clear(): void {
++        input.clear();
++        showPassword = false;
++    }
++
++    function takeFocus(): void {
++        input.forceActiveFocus();
++    }
++
++    function shake(): void {
++        shakeAnim.restart();
++    }
++
++    implicitHeight: 72
++
++    radius: Tokens.rounding.large
++    color: Colours.tPalette.m3surfaceContainerHighest
++    border.width: 2
++    border.color: root.error ? Colours.palette.m3error : root.busy ? "transparent" : input.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outlineVariant
++    opacity: root.busy ? 0.62 : 1
++
++    transform: Translate {
++        id: shift
++    }
++
++    Behavior on border.color {
++        CAnim {}
++    }
++
++    Behavior on opacity {
++        Anim {
++            type: Anim.DefaultEffects
++        }
++    }
++
++    SequentialAnimation {
++        id: shakeAnim
++
++        ShakeStep {
++            to: -10
++        }
++        ShakeStep {
++            to: 9
++        }
++        ShakeStep {
++            to: -7
++        }
++        ShakeStep {
++            to: 5
++        }
++        ShakeStep {
++            to: -3
++        }
++        ShakeStep {
++            to: 0
++        }
++    }
++
++    StateLayer {
++        hoverEnabled: false
++        cursorShape: Qt.IBeamCursor
++        radius: root.radius
++        onClicked: input.forceActiveFocus()
++    }
++
++    RowLayout {
++        anchors.fill: parent
++        anchors.leftMargin: 20
++        anchors.rightMargin: 12
++        spacing: 16
++
++        MaterialIcon {
++            text: "key"
++            color: root.error ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
++            fontStyle: Tokens.font.icon.medium
++        }
++
++        ColumnLayout {
++            Layout.fillWidth: true
++            spacing: 4
++
++            StyledText {
++                Layout.fillWidth: true
++                text: root.label
++                color: root.error ? Colours.palette.m3error : input.activeFocus && !root.busy ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
++                font: Tokens.font.label.medium
++                elide: Text.ElideRight
++            }
++
++            Item {
++                Layout.fillWidth: true
++                implicitHeight: Math.max(charList.implicitHeight, plain.implicitHeight)
++                clip: true
++
++                TextInput {
++                    id: input
++
++                    anchors.fill: parent
++                    opacity: 0
++                    focus: true
++                    enabled: !root.busy
++                    echoMode: TextInput.Normal
++                    onAccepted: root.accepted()
++                    Keys.onEscapePressed: root.cancelled()
++                }
++
++                StyledText {
++                    id: plain
++
++                    anchors.verticalCenter: parent.verticalCenter
++                    text: input.text
++                    color: Colours.palette.m3onSurface
++                    font: Tokens.font.body.large
++                    visible: root.echo
++                }
++
++                ListView {
++                    id: charList
++
++                    anchors.left: parent.left
++                    anchors.verticalCenter: parent.verticalCenter
++                    anchors.leftMargin: Math.min(4, parent.width - implicitWidth - 4)
++
++                    implicitWidth: contentWidth
++                    implicitHeight: Tokens.font.body.medium.pointSize
++
++                    orientation: Qt.Horizontal
++                    spacing: Tokens.spacing.extraSmall
++                    interactive: false
++                    visible: !root.echo
++
++                    model: ScriptModel {
++                        values: input.text.split("")
++                    }
++
++                    delegate: CharItem {}
++                }
++            }
++        }
++
++        Item {
++            implicitWidth: 44
++            implicitHeight: 44
++
++            MaterialIcon {
++                anchors.centerIn: parent
++                text: root.error ? "error" : root.showPassword ? "visibility_off" : "visibility"
++                color: root.error ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
++                fontStyle: Tokens.font.icon.medium
++                animate: true
++            }
++
++            StateLayer {
++                radius: Tokens.rounding.full
++                disabled: root.error || root.echo || !input.text
++                onClicked: root.showPassword = !root.showPassword
++            }
++        }
++    }
++
++    component ShakeStep: NumberAnimation {
++        target: shift
++        property: "x"
++        duration: 70
++        easing.type: Easing.OutQuad
++    }
++
++    component CharItem: Item {
++        id: char
++
++        required property int index
++
++        implicitWidth: charList.implicitHeight
++        implicitHeight: charList.implicitHeight
++
++        ListView.onRemove: {
++            initAnim.stop();
++            removeAnim.start();
++        }
++
++        SequentialAnimation {
++            id: initAnim
++
++            running: true
++
++            ParallelAnimation {
++                Anim {
++                    target: char
++                    property: "opacity"
++                    from: 0
++                    to: 1
++                    type: Anim.DefaultEffects
++                }
++                Anim {
++                    target: char
++                    property: "scale"
++                    from: 0
++                    to: 1
++                    type: Anim.FastSpatial
++                }
++                Anim {
++                    target: char
++                    property: "implicitWidth"
++                    from: charList.implicitHeight
++                    to: charList.implicitHeight * 1.3
++                    type: Anim.DefaultEffects
++                }
++            }
++            PauseAnimation {
++                duration: 180 * Tokens.anim.durations.scale
++            }
++            PropertyAction {
++                target: charShape
++                property: "shape"
++                value: MaterialShape.Circle
++            }
++            ParallelAnimation {
++                Anim {
++                    target: charShape
++                    property: "scale"
++                    to: 2 / 3
++                    type: Anim.FastSpatial
++                }
++                Anim {
++                    target: char
++                    property: "implicitWidth"
++                    to: charList.implicitHeight
++                    type: Anim.DefaultEffects
++                }
++            }
++        }
++
++        SequentialAnimation {
++            id: removeAnim
++
++            PropertyAction {
++                target: char
++                property: "ListView.delayRemove"
++                value: true
++            }
++            ParallelAnimation {
++                Anim {
++                    type: Anim.DefaultEffects
++                    target: char
++                    property: "opacity"
++                    to: 0
++                }
++                Anim {
++                    target: char
++                    property: "scale"
++                    to: 0.5
++                }
++            }
++            PropertyAction {
++                target: char
++                property: "ListView.delayRemove"
++                value: false
++            }
++        }
++
++        MaterialShape {
++            id: charShape
++
++            anchors.centerIn: parent
++            implicitSize: charList.implicitHeight * 1.5
++            shape: root.shapeQueue[char.index % root.shapeQueue.length] ?? MaterialShape.Circle
++            color: root.error ? Colours.palette.m3error : Colours.palette.m3onSurface
++
++            opacity: root.showPassword ? 0 : 1
++
++            Behavior on opacity {
++                Anim {
++                    type: Anim.DefaultEffects
++                }
++            }
++            Behavior on color {
++                CAnim {}
++            }
++        }
++
++        Loader {
++            anchors.centerIn: parent
++
++            opacity: root.showPassword ? 1 : 0
++            active: opacity > 0
++            asynchronous: true
++
++            sourceComponent: StyledText {
++                text: input.text[char.index] ?? ""
++            }
++
++            Behavior on opacity {
++                Anim {
++                    type: Anim.DefaultEffects
++                }
++            }
++        }
++    }
++}
+diff --git a/modules/polkit/Polkit.qml b/modules/polkit/Polkit.qml
+new file mode 100644
+index 0000000..a8c09ad
+--- /dev/null
++++ b/modules/polkit/Polkit.qml
+@@ -0,0 +1,89 @@
++pragma ComponentBehavior: Bound
++
++import QtQuick
++import Quickshell
++import Quickshell.Services.Polkit
++import Quickshell.Wayland
++import qs.components
++import qs.components.containers
++import qs.services
++
++Scope {
++    id: root
++
++    readonly property bool open: agent.isActive && !!agent.flow
++    property bool closing
++
++    // Keeps the surfaces alive until the dialog has faded out
++    onOpenChanged: closing = !open
++
++    PolkitAgent {
++        id: agent
++    }
++
++    LazyLoader {
++        active: root.open || root.closing
++
++        Scope {
++            id: prompt
++
++            readonly property ShellScreen screen: Screens.screens.find(s => s.name === Hypr.focusedMonitor?.name) ?? Screens.screens[0]
++
++            // The backdrop lives on its own surface so screen-share protection,
++            // which blanks whole surfaces, only hides the dialog
++            StyledWindow {
++                screen: prompt.screen
++                name: "polkit-scrim"
++                WlrLayershell.exclusionMode: ExclusionMode.Ignore
++                WlrLayershell.layer: WlrLayer.Top
++                WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
++
++                anchors.top: true
++                anchors.bottom: true
++                anchors.left: true
++                anchors.right: true
++
++                Rectangle {
++                    anchors.fill: parent
++                    color: Qt.alpha(Colours.palette.m3scrim, 0.5)
++                    opacity: 0
++                    Component.onCompleted: opacity = Qt.binding(() => root.closing ? 0 : 1)
++
++                    Behavior on opacity {
++                        Anim {
++                            type: Anim.FastEffects
++                            duration: root.closing ? 150 : 200
++                        }
++                    }
++                }
++            }
++
++            StyledWindow {
++                readonly property int shadowMargin: 48
++
++                screen: prompt.screen
++                name: "polkit"
++                WlrLayershell.exclusionMode: ExclusionMode.Ignore
++                WlrLayershell.layer: WlrLayer.Overlay
++                WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
++
++                anchors.top: true
++                margins.top: Math.max(0, (prompt.screen.height - dialog.placementHeight) / 2 - shadowMargin)
++
++                implicitWidth: dialog.implicitWidth + shadowMargin * 2
++                implicitHeight: dialog.surfaceHeight + shadowMargin * 2
++
++                AuthDialog {
++                    id: dialog
++
++                    anchors.top: parent.top
++                    anchors.topMargin: parent.shadowMargin
++                    anchors.horizontalCenter: parent.horizontalCenter
++                    flow: agent.flow
++                    closing: root.closing
++                    onClosed: root.closing = false
++                }
++            }
++        }
++    }
++}
+diff --git a/shell.qml b/shell.qml
+index 9ccf9cf..119efb3 100644
+--- a/shell.qml
++++ b/shell.qml
+@@ -9,6 +9,7 @@ import "modules/drawers"
+ import "modules/background"
+ import "modules/areapicker"
+ import "modules/lock"
++import "modules/polkit"
+ import QtQuick
+ import Quickshell
+ import qs.services
+@@ -33,6 +34,7 @@ ShellRoot {
+     Lock {
+         id: lock
+     }
++    Polkit {}
+ 
+     Shortcuts {}
+     BatteryMonitor {}
+-- 
+2.55.0
+
