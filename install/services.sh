@@ -15,6 +15,18 @@ for svc in "${system_services[@]}"; do
     fi
 done
 
+# Keeps LocalSend and other LAN devices reachable while the VPN is connected.
+if pkg_installed mullvad-vpn; then
+    if ! systemctl is-active --quiet mullvad-daemon; then
+        info "mullvad-daemon not running, skipped LAN sharing"
+    elif mullvad lan get | grep -q allow; then
+        info "mullvad LAN sharing already allowed"
+    else
+        mullvad lan set allow >/dev/null
+        info "mullvad LAN sharing allowed"
+    fi
+fi
+
 # zram-generator does nothing without a config.
 if pkg_installed zram-generator && [ ! -f /etc/systemd/zram-generator.conf ]; then
     printf '[zram0]\n' | sudo tee /etc/systemd/zram-generator.conf >/dev/null
