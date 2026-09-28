@@ -11,9 +11,7 @@
 
 return {
   { "mg979/vim-visual-multi", lazy = false }, -- Visual multi cursor
-  { "numToStr/Comment.nvim", opts = {}, lazy = false },
   { "echasnovski/mini.ai", opts = {}, lazy = false },
-  { "nvim-mini/mini.misc", version = false },
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
@@ -32,6 +30,8 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = { signs = true },
   },
+  -- snacks.indent draws the guides
+  { "lukas-reineke/indent-blankline.nvim", enabled = false },
   -- {
   --   "lukas-reineke/indent-blankline.nvim",
   --   opts = {
@@ -91,8 +91,6 @@ return {
     dependencies = { "nvim-treesitter/nvim-treesitter" },
   },
 
-  { "nvzone/volt", lazy = true },
-  { "nvzone/menu", lazy = true },
   {
     "rachartier/tiny-glimmer.nvim",
     lazy = false,
@@ -117,6 +115,7 @@ return {
   {
     "folke/snacks.nvim",
     lazy = false,
+    priority = 1000,
     ---@type snacks.Config
     opts = {
       bigfile = { enabled = true },
