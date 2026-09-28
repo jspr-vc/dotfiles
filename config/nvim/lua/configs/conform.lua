@@ -11,13 +11,13 @@ local options = {
     json = { "biome" },
     yaml = { "biome-check" },
     markdown = { "biome" },
-    grapql = { "biome-check" },
+    graphql = { "biome-check" },
   },
 
   format_on_save = {
     -- These options will be passed to conform.format()
     timeout_ms = 500,
-    lsp_fallback = true,
+    lsp_format = "fallback",
   },
 }
 
