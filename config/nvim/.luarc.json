@@ -1,12 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
-  "workspace.library": [
-    "/usr/share/hypr/stubs"
-  ],
+  "runtime.version": "LuaJIT",
   "workspace.checkThirdParty": false,
-  "diagnostics.globals": [
-    "hl",
-    "vim",
-    "Snacks"
-  ]
+  "diagnostics.globals": ["Snacks"]
 }
