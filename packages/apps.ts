@@ -70,6 +70,8 @@ export default {
     fnm: "node version manager, set up in .zshrc and install/extras.sh",
     bob: "neovim version manager, install/extras.sh; config in config/nvim",
     "tree-sitter-cli": "builds parsers for nvim-treesitter's main branch",
+    zip: "packs luarocks and plugin archives for lazy.nvim",
+    unzip: "unpacks luarocks and plugin archives for lazy.nvim, also used by install/bootstrap.sh",
     "git-delta": "git diff pager, configured in install/extras.sh",
     lazygit: "git TUI",
     lazydocker: "docker TUI behind the ld alias",
