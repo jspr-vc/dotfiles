@@ -17,3 +17,7 @@ config/gtk-3.0/bookmarks
 
 # tpm installs plugins into the symlinked tmux dir
 config/tmux/plugins/
+
+# superfile writes its bundled themes into the symlinked theme dir
+config/superfile/theme/*
+!config/superfile/theme/caelestia.toml

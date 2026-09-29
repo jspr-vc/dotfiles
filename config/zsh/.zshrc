@@ -149,11 +149,9 @@ function activate() {
 }
 
 function y() {
-    local tmp="$(mktemp -t yazi-cwd.XXXXXX)" cwd
-    yazi "$@" --cwd-file="$tmp"
-    cwd="$(<"$tmp")"
-    [[ -n "$cwd" && "$cwd" != "$PWD" ]] && builtin cd -- "$cwd"
-    rm -f -- "$tmp"
+    local lastdir="${XDG_STATE_HOME:-$HOME/.local/state}/superfile/lastdir"
+    command spf "$@"
+    [[ -f "$lastdir" ]] && { . "$lastdir"; rm -f -- "$lastdir"; }
 }
 
 function nowplaying() {
