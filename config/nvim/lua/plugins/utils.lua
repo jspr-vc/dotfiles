@@ -92,6 +92,34 @@ return {
   },
 
   {
+    "laytan/cloak.nvim",
+    -- loaded at startup so telescope previews of .env files are cloaked too
+    lazy = false,
+    opts = {
+      cloak_character = "•",
+      highlight_group = "Comment",
+      cloak_telescope = true,
+      patterns = {
+        {
+          file_pattern = { ".env*", ".dev.vars*" },
+          -- keep the surrounding quotes visible and mask only what is inside them
+          cloak_pattern = {
+            "(=')[^']+",
+            '(=")[^"]+',
+            '(\\")[^"]+',
+            "(=)[^'\"].*",
+          },
+          replace = "%1",
+        },
+      },
+    },
+    keys = {
+      { "<leader>tc", "<cmd>CloakToggle<CR>", desc = "Cloak Toggle hiding env values" },
+      { "<leader>cp", "<cmd>CloakPreviewLine<CR>", desc = "Cloak Reveal value on current line" },
+    },
+  },
+
+  {
     "rachartier/tiny-glimmer.nvim",
     lazy = false,
     priority = 10, -- Low priority to catch other plugins' keybindings
