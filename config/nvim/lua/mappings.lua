@@ -162,6 +162,17 @@ local find_all_files = function()
   }
 end
 
+-- rg skips dotfiles by default, and with --hidden it would also walk .git
+local grep_args = { "--hidden", "--glob", "!**/.git/*" }
+
+local live_grep = function()
+  telescope.live_grep { additional_args = grep_args }
+end
+
+local grep_word = function()
+  telescope.grep_string { additional_args = grep_args }
+end
+
 -- Good defaults
 map("n", ";", ":", { desc = "CMD enter command mode" })
 map({ "n", "v" }, "j", "gj")
@@ -178,12 +189,12 @@ map("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Navigation Move selection down" 
 map("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Navigation Move selection up" })
 
 -- Telescope
-map("n", "<leader>fg", telescope.live_grep, { desc = "FuzzyFind Find with Live Grep" })
+map("n", "<leader>fg", live_grep, { desc = "FuzzyFind Find with Live Grep" })
 map("n", "<leader>fh", telescope.help_tags, { desc = "FuzzyFind Find Help" })
 map("n", "<leader>fo", telescope.oldfiles, { desc = "FuzzyFind Find Old files" })
 map("n", "<leader>fk", telescope.keymaps, { desc = "FuzzyFind Find Keymaps" })
 map("n", "<leader>fb", telescope.builtin, { desc = "FuzzyFind Find Telescope [B]uiltin" })
-map("n", "<leader>fw", telescope.grep_string, { desc = "FuzzyFind Find current [W]ord" })
+map("n", "<leader>fw", grep_word, { desc = "FuzzyFind Find current [W]ord" })
 map("n", "<leader>fd", telescope.diagnostics, { desc = "FuzzyFind Find Diagnostics" })
 map("n", "<leader>fr", telescope.resume, { desc = "FuzzyFind Find Resume" })
 map("n", "<leader><leader>", telescope.buffers, { desc = "FuzzyFind Find existing buffers" })
