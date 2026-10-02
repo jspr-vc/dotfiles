@@ -98,7 +98,8 @@ hl.window_rule({ name = "xeneon-edge", match = { title = "^(xeneon-edge)$" }, mo
 local protected = {
     { name = "1password", match = { class = "^(1password)$" } },
     { name = "1password-quick-access", match = { title = "^(Quick Access — 1Password)$" } },
-    { name = "polkit-agent", layer = true, match = { namespace = "^(caelestia-polkit)$" } },
+    -- TEMP: polkit prompt unhidden from capture, restore this line when done
+    -- { name = "polkit-agent", layer = true, match = { namespace = "^(caelestia-polkit)$" } },
     { name = "discord", match = { class = "^(discord)$" } },
     { name = "slack", match = { class = "^(Slack)$" } },
     { name = "thunderbird", match = { class = "^(thunderbird|org.mozilla.Thunderbird)$" } },
