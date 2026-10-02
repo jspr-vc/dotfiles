@@ -44,6 +44,7 @@ export default {
     isoimagewriter: "writes ISOs to USB",
     "ventoy-bin": "multi-ISO bootable USB",
     "localsend-bin": "file and text transfer to phones on the same network",
+    "lan-mouse": "shares mouse and keyboard with the Windows machine over the LAN, started by hand with lm_on",
   },
 
   cli: {
