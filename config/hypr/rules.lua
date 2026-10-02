@@ -96,7 +96,8 @@ hl.window_rule({ name = "xeneon-edge", match = { title = "^(xeneon-edge)$" }, mo
 --------------------------------------------------------------------------
 
 local protected = {
-    { name = "1password", match = { class = "^(1password)$" } },
+    -- The SSH approval prompt is the only window titled exactly "1Password"; it stays capturable
+    { name = "1password", match = { class = "^(1password)$", title = "negative:^(1Password)$" } },
     { name = "1password-quick-access", match = { title = "^(Quick Access — 1Password)$" } },
     -- TEMP: polkit prompt unhidden from capture, restore this line when done
     -- { name = "polkit-agent", layer = true, match = { namespace = "^(caelestia-polkit)$" } },
