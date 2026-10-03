@@ -38,6 +38,7 @@ export default {
   shell: {
     "caelestia-shell": "the desktop shell: bar, launcher, notifications, lock, session, OSD",
     "caelestia-cli": "caelestia command: scheme, wallpaper, screenshot, clipboard, emoji, shell IPC",
+    hyprpolkitagent: "polkit agent autostart.lua falls back to when the shell's polkit patch is not applied",
     qtengine: "Qt platform theme that caelestia colours (QT_QPA_PLATFORMTHEME in env.lua)",
     "darkly-bin": "Qt widget style qtengine asks for, so Dolphin and other Qt apps match caelestia",
     fuzzel: "dmenu backend for audio-pick, bt-pick, win-pick, keys-hint; themed by caelestia",
