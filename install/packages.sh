@@ -21,6 +21,18 @@ for kernel in linux-lts linux-zen linux-hardened; do
     if pkg_installed "$kernel"; then wanted+=("${kernel}-headers"); fi
 done
 
+# pipewire-pulse and pipewire-jack conflict with these, and --noconfirm answers
+# the "remove it?" prompt with no. -dd because packages depending on jack stay
+# satisfied by pipewire-jack once it lands.
+conflicting=()
+for pkg in pulseaudio-alsa pulseaudio-bluetooth pulseaudio jack2; do
+    if pkg_installed "$pkg"; then conflicting+=("$pkg"); fi
+done
+if [ ${#conflicting[@]} -gt 0 ]; then
+    info "removing ${conflicting[*]}, replaced by pipewire"
+    sudo pacman -Rdd --noconfirm "${conflicting[@]}"
+fi
+
 missing=()
 for pkg in "${wanted[@]}"; do
     pkg_installed "$pkg" || missing+=("$pkg")

@@ -66,6 +66,8 @@ for src in "${DOTFILES}"/claude/skills/*; do
 done
 
 mkdir -p "${HOME}/.local/state/hypr"
+# Where the special:ai workspace (rules.lua) and the ch alias start claude.
+mkdir -p "${HOME}/claude-home"
 
 if [ -f "${HOME}/.face" ] && [ ! -e "${HOME}/.face.icon" ]; then
     ln -s "${HOME}/.face" "${HOME}/.face.icon"

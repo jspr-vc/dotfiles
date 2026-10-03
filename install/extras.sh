@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tooling that lives outside pacman: tmux plugins, node, neovim.
+# Tooling that lives outside pacman: tmux plugins, node, neovim, Claude Code.
 
 step "extras"
 
@@ -35,4 +35,13 @@ fi
 if pkg_installed bob; then
     bob use stable
     info "neovim $("${HOME}/.local/share/bob/nvim-bin/nvim" --version | head -1)"
+fi
+
+# Opened by the special:ai workspace in rules.lua. Updates itself afterwards.
+if [ -x "${HOME}/.local/bin/claude" ]; then
+    info "claude present"
+elif curl -fsSL https://claude.ai/install.sh | bash; then
+    info "claude installed to ~/.local/bin"
+else
+    warn "claude install failed; run 'curl -fsSL https://claude.ai/install.sh | bash'"
 fi

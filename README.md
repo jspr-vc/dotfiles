@@ -42,7 +42,7 @@ Anything the symlinks displace goes to `~/.dotfiles-backup/<timestamp>/`.
 
 The installer never refreshes the package database on its own, so it cannot cause a partial upgrade. If a download 404s because the database is stale, run `sudo pacman -Syu` yourself and rerun the step.
 
-Before the `dotfiles` step, sign in to 1Password and turn on Settings > Developer > Use the SSH agent. The step asks for your git name and email, then lists the agent's keys so you can pick the one that signs commits. Without the agent, commits stay unsigned until you rerun `--only dotfiles`.
+The `dotfiles` step asks for your git name and email, then lists the keys in 1Password's SSH agent so you can pick the one that signs commits. On a fresh machine there is no agent yet, so the first run leaves commits unsigned. After the first login, sign in to 1Password, turn on Settings > Developer > Use the SSH agent, and run `./install.sh --only dotfiles`.
 
 `boot` turns on the fallback initramfs, sets systemd-boot to default to the last picked entry and use the highest menu resolution, updates systemd-boot on the ESP and enables `systemd-boot-update.service`. It does nothing on a machine without systemd-boot.
 

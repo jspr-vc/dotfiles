@@ -91,7 +91,6 @@ export default {
     act: "run GitHub Actions locally",
     ngrok: "tunnels to local servers",
     "postman-bin": "API client",
-    // "opencode-bin": "AI agent opened in the special:ai workspace",
   },
 
   containers: {
