@@ -54,6 +54,7 @@ export default {
     pavucontrol: "audio mixer GUI, floating window rule in rules.lua",
     bluez: "bluetooth stack",
     "bluez-utils": "bluetoothctl for bt-pick",
+    blueman: "bluetooth manager GUI and tray applet",
     networkmanager: "networking, shown in the caelestia bar",
     "network-manager-applet": "nm-applet tray and connection editor",
     "power-profiles-daemon": "power profiles switched from the caelestia bar",
