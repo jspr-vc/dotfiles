@@ -2,23 +2,37 @@
 # Custom colour schemes live inside caelestia-cli's package data, which pacman
 # replaces on every upgrade. Copy them now and hook pacman to copy them again.
 # The scheme postHook (bin/sddm-sync) is wired through config/caelestia/cli.json.
+#
+# The hooks run as root, so they read root-owned copies under /usr/local, not
+# the repo: nothing in $HOME is executed as root and the hooks survive the repo
+# or the home directory moving. Rerun this step after editing a scheme or a
+# shell patch to refresh the copies.
 
 step "caelestia"
+
+share=/usr/local/share/caelestia
+sudo mkdir -p "$share" /etc/pacman.d/hooks
+
+# sync_copy SRC NAME: replace $share/NAME with a root-owned copy of SRC.
+sync_copy() {
+    sudo rm -rf "${share:?}/$2"
+    sudo cp -r --no-preserve=ownership "$1" "$share/$2"
+}
 
 schemes_src="${DOTFILES}/config/caelestia/schemes"
 if [ ! -d "$schemes_src" ]; then
     warn "no custom schemes in $schemes_src"
 else
-schemes_dst=$(/usr/bin/python -c 'import caelestia,os;print(os.path.join(os.path.dirname(caelestia.__file__),"data","schemes"))')
-[ -n "$schemes_dst" ] || die "could not locate caelestia-cli data dir"
+    schemes_dst=$(/usr/bin/python -c 'import caelestia,os;print(os.path.join(os.path.dirname(caelestia.__file__),"data","schemes"))')
+    [ -n "$schemes_dst" ] || die "could not locate caelestia-cli data dir"
 
-sudo mkdir -p "$schemes_dst"
-sudo cp -r "${schemes_src}/." "${schemes_dst}/"
-info "schemes copied to $schemes_dst"
+    sync_copy "$schemes_src" schemes
+    sudo mkdir -p "$schemes_dst"
+    sudo cp -r "$share/schemes/." "${schemes_dst}/"
+    info "schemes copied to $schemes_dst"
 
-hook=/etc/pacman.d/hooks/caelestia-schemes.hook
-sudo mkdir -p /etc/pacman.d/hooks
-sudo tee "$hook" >/dev/null <<HOOK
+    hook=/etc/pacman.d/hooks/caelestia-schemes.hook
+    sudo tee "$hook" >/dev/null <<HOOK
 [Trigger]
 Operation = Install
 Operation = Upgrade
@@ -29,17 +43,20 @@ Target = caelestia-cli
 Description = Restoring custom caelestia schemes
 Depends = coreutils
 When = PostTransaction
-Exec = /bin/sh -c "cp -r ${schemes_src}/. ${schemes_dst}/"
+Exec = /bin/sh -c "cp -r $share/schemes/. ${schemes_dst}/"
 HOOK
-info "pacman hook written to $hook"
+    info "pacman hook written to $hook"
 fi
 
 # Shell customisations are patches on the packaged shell in /etc/xdg rather
 # than a copy in ~/.config/quickshell, so the QML always matches the installed
 # caelestia-shell. The hook re-applies them after every upgrade.
-patches="${DOTFILES}/config/caelestia/shell-patches"
-patcher="${DOTFILES}/system/caelestia-shell-patch"
-sudo "$patcher" "$patches" || warn "a shell patch no longer applies; update it in $patches"
+patches_src="${DOTFILES}/config/caelestia/shell-patches"
+patches="$share/shell-patches"
+patcher=/usr/local/bin/caelestia-shell-patch
+sudo install -m 755 "${DOTFILES}/system/caelestia-shell-patch" "$patcher"
+sync_copy "$patches_src" shell-patches
+sudo "$patcher" "$patches" || warn "a shell patch no longer applies; update it in $patches_src"
 
 sudo tee /etc/pacman.d/hooks/caelestia-shell-patches.hook >/dev/null <<HOOK
 [Trigger]
