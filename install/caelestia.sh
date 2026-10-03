@@ -83,13 +83,22 @@ fi
 # ghostty's point straight at the rendered files. Re-apply the current scheme
 # so a fresh machine, or a template added since the last change, has them.
 # Any scheme argument triggers the apply; the current mode changes nothing.
-# Runs after dotfiles (templates linked) and sddm (the postHook's theme dir).
+# Setting a wallpaper applies the scheme too, so a machine without one gets the
+# first entry of wallpapers.txt through the same call.
+# Runs after dotfiles (templates linked), sddm (the postHook's theme dir) and
+# wallpapers (the files).
 #
 # The Chromium theming runs `brave --refresh-platform-policy --no-startup-window`
 # and waits on it. With Brave closed that starts a windowless Brave that never
 # exits, so the apply hangs. Kill that child once it outlives a normal handoff
 # to a running Brave; the policy file is already written and read on next start.
-caelestia scheme set -m "$(caelestia scheme get -m)" >/dev/null &
+apply=(caelestia scheme set -m "$(caelestia scheme get -m)")
+if [ ! -s "${HOME}/.local/state/caelestia/wallpaper/path.txt" ]; then
+    read -r subdir url < <(grep -v '^#' "${DOTFILES}/wallpapers.txt") || true
+    first="${WALLPAPER_DIR}/${subdir:-}/${url##*/}"
+    [ -f "$first" ] && apply=(caelestia wallpaper -f "$first")
+fi
+"${apply[@]}" >/dev/null &
 apply_pid=$!
 while kill -0 "$apply_pid" 2>/dev/null; do
     sleep 2

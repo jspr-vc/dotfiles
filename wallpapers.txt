@@ -1,0 +1,8 @@
+# Wallpapers install/wallpapers.sh downloads into ~/Pictures/Wallpapers.
+# One per line: <subdirectory> <direct image URL>. The first line is the one a
+# machine with no wallpaper starts on.
+4k-oled https://w.wallhaven.cc/full/o3/wallhaven-o35p7p.jpg
+4k-oled https://w.wallhaven.cc/full/3q/wallhaven-3q6m6y.png
+4k-oled https://w.wallhaven.cc/full/6l/wallhaven-6lyo7x.jpg
+4k-oled https://w.wallhaven.cc/full/ly/wallhaven-lyjvl2.jpg
+4k-oled https://w.wallhaven.cc/full/w5/wallhaven-w5xdzx.jpg

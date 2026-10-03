@@ -23,6 +23,7 @@ zen/         Zen without an account: policies.json (extensions, search) to /etc/
 system/      root-run helpers: xorg-primary-gpu and its unit (install/gpu.sh), caelestia-shell-patch (install/caelestia.sh and a pacman hook, which run root-owned copies under /usr/local; rerun `--only caelestia` after editing a scheme or shell patch)
 packages/    desktop.ts, apps.ts, <hostname>.ts: typed { group: { package: "reason" } }
 install/     one file per install step
+wallpapers.txt  links install/wallpapers.sh downloads into ~/Pictures/Wallpapers
 docs/adr/    decisions worth remembering
 CONTEXT.md   glossary
 ```
@@ -35,7 +36,7 @@ cd ~/dotfiles
 ./install.sh
 ```
 
-Steps, in order: `bootstrap`, `packages`, `dotfiles`, `services`, `theming`, `sddm`, `caelestia`, `zen`, `boot`, `gpu`, `extras`.
+Steps, in order: `bootstrap`, `packages`, `dotfiles`, `services`, `theming`, `sddm`, `wallpapers`, `caelestia`, `zen`, `boot`, `gpu`, `extras`.
 Run one with `--only <step>`, drop one with `--skip <step>`. Every step is safe to run again.
 Anything the symlinks displace goes to `~/.dotfiles-backup/<timestamp>/`.
 

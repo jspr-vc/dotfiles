@@ -8,7 +8,9 @@ BACKUP_DIR="${BACKUP_DIR:-${BACKUP_ROOT}/$(date +%Y%m%d-%H%M%S)}"
 # bun runs install/packages.ts; pinned and installed by install/bootstrap.sh
 BUN_VERSION="1.4.2"
 BUN="${BUN_INSTALL:-${HOME}/.bun}/bin/bun"
-export DOTFILES BACKUP_ROOT BACKUP_DIR BUN BUN_VERSION
+# paths.wallpaperDir in config/caelestia/shell.json
+WALLPAPER_DIR="${HOME}/Pictures/Wallpapers"
+export DOTFILES BACKUP_ROOT BACKUP_DIR BUN BUN_VERSION WALLPAPER_DIR
 
 # Warnings are replayed by install.sh at the end as the still to do list.
 TODO=()
