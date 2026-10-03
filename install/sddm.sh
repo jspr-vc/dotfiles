@@ -8,7 +8,7 @@ step "sddm"
 theme_dir="/usr/share/sddm/themes/caelestia"
 sudo mkdir -p "$theme_dir"
 sudo cp -r "${DOTFILES}/sddm/caelestia/." "$theme_dir/"
-sudo chown -R "${USER}:${USER}" "$theme_dir"
+sudo chown -R "$(id -un):$(id -gn)" "$theme_dir"
 info "theme copied to $theme_dir"
 
 # sddm reads conf.d/*.conf alphabetically and the last file wins.
@@ -21,5 +21,5 @@ if [ -f "${HOME}/.local/state/caelestia/scheme.json" ]; then
     "${DOTFILES}/bin/sddm-sync"
     info "theme synced to the current scheme"
 else
-    warn "no caelestia scheme yet; run bin/sddm-sync after the first scheme apply"
+    info "no caelestia scheme yet; the caelestia step applies one and its hook syncs the theme"
 fi

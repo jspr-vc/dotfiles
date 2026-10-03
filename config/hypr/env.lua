@@ -38,8 +38,12 @@ if #cards > 1 and overrules_kernel then
 end
 
 -- The login session's PATH has no user bins; every bind that calls bin/
--- and the swappy shim depend on this.
-local user_bins = { util.home .. "/.local/bin", util.home .. "/.bun/bin" }
+-- and the swappy shim depend on this. bob's dir is where nvim lives.
+local user_bins = {
+    util.home .. "/.local/bin",
+    util.home .. "/.bun/bin",
+    util.home .. "/.local/share/bob/nvim-bin",
+}
 local path = {}
 local seen = {}
 for _, dir in ipairs(user_bins) do

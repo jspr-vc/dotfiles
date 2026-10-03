@@ -41,14 +41,19 @@ if pkg_installed v4l2loopback-dkms && [ ! -f /etc/modules-load.d/v4l2loopback.co
     info "v4l2loopback configured, active after reboot"
 fi
 
-for svc in pipewire pipewire-pulse wireplumber; do
-    if systemctl --user is-enabled "$svc" &>/dev/null; then
-        info "$svc (user) already enabled"
-    else
-        systemctl --user enable "$svc"
-        info "enabled $svc (user)"
-    fi
-done
+# The user manager is only reachable from a real login, not `su` or a chroot.
+if systemctl --user show-environment &>/dev/null; then
+    for svc in pipewire pipewire-pulse wireplumber; do
+        if systemctl --user is-enabled "$svc" &>/dev/null; then
+            info "$svc (user) already enabled"
+        else
+            systemctl --user enable "$svc"
+            info "enabled $svc (user)"
+        fi
+    done
+else
+    warn "no user systemd session; log in on a TTY and rerun --only services"
+fi
 
 if [ "$(getent passwd "$USER" | cut -d: -f7)" != "/usr/bin/zsh" ]; then
     chsh -s /usr/bin/zsh

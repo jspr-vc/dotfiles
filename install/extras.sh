@@ -10,7 +10,8 @@ if command -v tmux &>/dev/null; then
         git clone https://github.com/tmux-plugins/tpm "${HOME}/.tmux/plugins/tpm"
         info "tpm cloned"
     fi
-    [ -x "${HOME}/.tmux/plugins/tpm/scripts/install_plugins.sh" ] && "${HOME}/.tmux/plugins/tpm/scripts/install_plugins.sh" >/dev/null
+    "${HOME}/.tmux/plugins/tpm/scripts/install_plugins.sh" >/dev/null ||
+        warn "tmux plugin install failed; press prefix + I inside tmux"
 fi
 
 if pkg_installed fnm; then

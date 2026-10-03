@@ -73,7 +73,7 @@ export default {
     "tree-sitter-cli": "builds parsers for nvim-treesitter's main branch",
     zip: "packs luarocks and plugin archives for lazy.nvim",
     unzip: "unpacks luarocks and plugin archives for lazy.nvim, also used by install/bootstrap.sh",
-    "git-delta": "git diff pager, configured in install/extras.sh",
+    "git-delta": "git diff pager, configured in home/.gitconfig",
     lazygit: "git TUI",
     lazydocker: "docker TUI behind the ld alias",
     "gh-dash": "PR and issue dashboard behind the ghd alias, config/gh-dash",
