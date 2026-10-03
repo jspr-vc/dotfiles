@@ -85,9 +85,9 @@
   "autoMode": {
     "allow": [
       "$defaults",
-      "Bash(hyprctl:*) in /home/manok/dotfiles — routine desktop-environment inspection/control, high-frequency read/control tool",
-      "Bash(qs:*) in /home/manok/dotfiles — Quickshell CLI used routinely with Caelestia config",
-      "Bash(caelestia:*) in /home/manok/dotfiles — project's own shell CLI, routine usage"
+      "Bash(hyprctl:*) in $HOME/dotfiles — routine desktop-environment inspection/control, high-frequency read/control tool",
+      "Bash(qs:*) in $HOME/dotfiles — Quickshell CLI used routinely with Caelestia config",
+      "Bash(caelestia:*) in $HOME/dotfiles — project's own shell CLI, routine usage"
     ],
     "soft_deny": [
       "$defaults",
@@ -117,9 +117,9 @@
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
       "### User-specific",
       "**Primary use of Claude Code**: personal dotfiles / desktop environment configuration (Hyprland, Caelestia, Arch Linux) for this repo",
-      "**Trusted repo**: /home/manok/dotfiles (remote: github.com:jspr-vc/dotfiles.git) — public repo, so only this repo's own work belongs in commits/pushes here; secrets are never cleared into it regardless of visibility",
+      "**Trusted repo**: $HOME/dotfiles (remote: github.com:jspr-vc/dotfiles.git) — public repo, so only this repo's own work belongs in commits/pushes here; secrets are never cleared into it regardless of visibility",
       "**Org-specific CLIs**: None configured — project-specific tools observed: hyprctl, caelestia, qs, mullvad, busctl (Hyprland/Caelestia desktop environment tooling)",
-      "routine under /home/manok/dotfiles/ prefix: git status/diff/log/pull/add/commit/push and ./check.sh, per the repo's sync skill"
+      "routine under $HOME/dotfiles/ prefix: git status/diff/log/pull/add/commit/push and ./check.sh, per the repo's sync skill"
     ]
   }
 }
