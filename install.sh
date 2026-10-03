@@ -13,14 +13,20 @@ export DOTFILES
 # shellcheck source=install/lib.sh
 source "${DOTFILES}/install/lib.sh"
 
+command -v pacman &>/dev/null || die "pacman not found; this installer is Arch only"
+command -v sudo &>/dev/null || die "sudo not found; as root run 'pacman -S sudo' and put your user in wheel"
+
 STEPS=(bootstrap packages dotfiles services theming sddm wallpapers caelestia zen boot gpu extras)
 only=()
 skip=()
 
 while [ $# -gt 0 ]; do
     case "$1" in
-        --only) only+=("$2"); shift 2 ;;
-        --skip) skip+=("$2"); shift 2 ;;
+        --only | --skip)
+            [ $# -ge 2 ] || die "$1 needs a step name"
+            if [ "$1" = --only ]; then only+=("$2"); else skip+=("$2"); fi
+            shift 2
+            ;;
         -h | --help)
             sed -n '2,6p' "$0"
             printf 'steps: %s\n' "${STEPS[*]}"
@@ -59,7 +65,11 @@ step "done"
 info "ran:     ${ran[*]:-none}"
 info "skipped: ${skipped[*]:-none}"
 [ -d "$BACKUP_DIR" ] && info "backups: $BACKUP_DIR"
-info "log out and pick Hyprland in SDDM to start the new session"
+if systemctl is-active --quiet sddm; then
+    info "log out and pick Hyprland in SDDM to start the new session"
+else
+    info "reboot and pick Hyprland in SDDM to start the new session"
+fi
 
 if [ ${#TODO[@]} -gt 0 ]; then
     step "still to do"
