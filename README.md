@@ -22,6 +22,7 @@ sddm/        the login theme, copied to /usr/share/sddm/themes/caelestia
 zen/         Zen without an account: policies.json (extensions, search) to /etc/zen/policies, user.js linked and profile/ (mods, shortcuts) copied by bin/zen-sync
 system/      root-run helpers: xorg-primary-gpu and its unit (install/gpu.sh), caelestia-shell-patch (install/caelestia.sh and a pacman hook, which run root-owned copies under /usr/local; rerun `--only caelestia` after editing a scheme or shell patch)
 packages/    desktop.ts, apps.ts, <hostname>.ts: typed { group: { package: "reason" } }
+             flatpak/apps.ts: the same shape keyed by flathub application id, installed per user by the packages step
 install/     one file per install step
 wallpapers.txt  links install/wallpapers.sh downloads into ~/Pictures/Wallpapers
 docs/adr/    decisions worth remembering

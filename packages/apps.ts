@@ -37,7 +37,7 @@ export default {
     thunderbird: "mail",
     "libreoffice-fresh": "office suite",
     qbittorrent: "torrents",
-    flatpak: "apps not packaged for Arch",
+    flatpak: "apps not packaged for Arch, listed in packages/flatpak/apps.ts",
     "vlc-plugin-ass": "styled subtitles for vlc",
     "mullvad-vpn": "VPN client, daemon enabled in install/services.sh",
     "wireguard-tools": "wg-quick for WireGuard profiles",

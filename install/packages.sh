@@ -46,3 +46,26 @@ else
         die "package install failed; if it was a 404, run 'sudo pacman -Syu' and rerun"
     fi
 fi
+
+# Per user, so no root prompt and the apps land where `flatpak --user` looks.
+if command -v flatpak &>/dev/null; then
+    flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+    flatpaks=()
+    while IFS= read -r app; do flatpaks+=("$app"); done < <("$BUN" run "${DOTFILES}/install/packages.ts" list "${DOTFILES}/packages/flatpak/apps.ts")
+
+    missing_flatpaks=()
+    for app in "${flatpaks[@]}"; do
+        flatpak info --user "$app" &>/dev/null || missing_flatpaks+=("$app")
+    done
+
+    if [ ${#missing_flatpaks[@]} -eq 0 ]; then
+        info "all ${#flatpaks[@]} flatpaks present"
+    else
+        info "installing ${#missing_flatpaks[@]} flatpaks: ${missing_flatpaks[*]}"
+        flatpak install --user --noninteractive flathub "${missing_flatpaks[@]}" ||
+            warn "flatpak install failed; rerun --only packages"
+    fi
+else
+    warn "flatpak not installed, skipped packages/flatpak/apps.ts"
+fi
