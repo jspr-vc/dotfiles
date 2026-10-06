@@ -44,6 +44,8 @@ export default {
     isoimagewriter: "writes ISOs to USB",
     "ventoy-bin": "multi-ISO bootable USB",
     "localsend-bin": "file and text transfer to phones on the same network",
+    "qalculate-qt": "calculator with units and currency conversion",
+    "drawio-desktop": "diagram editor, saves plain .drawio files",
   },
 
   cli: {

@@ -26,6 +26,14 @@ hl.window_rule({
     float = true,
     size = { 800, 600 },
 })
+hl.window_rule({ name = "blueman-float", match = { class = "^(blueman-.*)$" }, float = true })
+hl.window_rule({
+    name = "qalculate-float",
+    match = { class = "^(io.github.Qalculate.qalculate-qt|qalculate-qt)$" },
+    float = true,
+    size = { "window_w", "monitor_h*0.45" },
+})
+hl.window_rule({ name = "drawio-float", match = { class = "^(drawio|draw\\.io)$" }, float = true })
 hl.window_rule({
     name = "dialogs-float",
     match = { class = "^(yad|zenity|wev|nwg-look|hyprland-share-picker)$" },
