@@ -42,6 +42,3 @@
 
 Before scaffolding any new project or app, read `~/.claude/docs/scaffold-strategy.md`: monorepo and single-app shapes, tooling, the Neon Postgres driver, db naming conventions, local infra.
 
-## Background (CVs, cover letters, applications)
-
-- Hands-on with **Terraform** and **AWS CDK**. Never list these as gaps.

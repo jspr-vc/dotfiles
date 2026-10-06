@@ -34,7 +34,6 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus",
   "worktree": {
     "baseRef": "fresh"
   },
@@ -49,7 +48,8 @@
     "lua-lsp@claude-plugins-official": true,
     "typesafe@typesafe-ai": true,
     "tw@technical-writing-skills": true,
-    "vercel@claude-plugins-official": true
+    "vercel@claude-plugins-official": true,
+    "drawio@drawio": true
   },
   "extraKnownMarketplaces": {
     "typesafe-ai": {
@@ -68,6 +68,12 @@
       "source": {
         "source": "github",
         "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "drawio": {
+      "source": {
+        "source": "github",
+        "repo": "jgraph/drawio-mcp"
       }
     }
   },
