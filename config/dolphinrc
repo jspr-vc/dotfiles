@@ -1,5 +1,8 @@
 MenuBar=Disabled
 
+[DetailsMode]
+PreviewSize=16
+
 [General]
 ShowSelectionToggle=false
 ShowStatusBar=false
