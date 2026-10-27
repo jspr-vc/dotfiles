@@ -1,8 +1,36 @@
 # Scaffold Strategy
 
 Default stack and conventions for new projects. Two shapes: **monorepo** (default for
-anything with more than one deployable) and **single app** (one Next.js app, no workspaces).
+anything with more than one deployable) and **single app** (one app, no workspaces).
 Pick single app unless there is a second deployable or a package genuinely shared across apps.
+
+## Framework
+
+**TanStack Start** (Vite + TanStack Router) is the default for every web app. **Next.js**
+stays available for content sites.
+
+- App behind a login, dashboard, internal tool, SaaS product: TanStack Start.
+- Public site where SEO, cached HTML, ISR, PPR or image optimisation matter (marketing,
+  blog, docs, catalogue): Next.js.
+- A product with both: Start for the app, Next.js for the public site, as separate
+  deployables in the monorepo.
+
+TanStack Start conventions:
+
+- `@tanstack/react-start` via its Vite plugin. File routes in `src/routes/`, router in
+  `src/router.tsx`. `routeTree.gen.ts` is committed and excluded from biome.
+- Data reads through route loaders, mutations through `createServerFn` with inputs validated
+  by `.inputValidator(zodSchema)`. Server functions are the single-consumer path; tRPC when
+  there is more than one consumer.
+- Auth guards in `beforeLoad` on a pathless layout route, not repeated per page.
+- better-auth handler mounted at `src/routes/api/auth/$.ts`, tRPC at `src/routes/api/trpc/$.ts`.
+- Server-only modules wrap with `createServerOnlyFn`. There is no `server-only` package to
+  import, and the db package stays free of framework imports either way.
+- Build output is `dist/` (`.output/` when the Nitro plugin is on). Deploys to Vercel
+  natively or to any Node or Bun target.
+
+Next.js conventions, when chosen: App Router, `app/` dir, RSC for data reads, server actions
+for single-consumer mutations, `server-only` on the query layer.
 
 ## Runtime and tooling (both shapes)
 
@@ -13,23 +41,28 @@ Pick single app unless there is a second deployable or a package genuinely share
 - **lefthook** pre-commit running `bunx biome check --write --no-errors-on-unmatched
   --files-ignore-unknown=true {staged_files}` with `stage_fixed: true`.
 - **TypeScript** everywhere, type hints always.
-- Env validated per package with `@t3-oss/env-nextjs` + zod. One `env-*.ts` per concern
-  (`env-db.ts`, `env-auth.ts`, `env-client.ts`, `env-server.ts`), each exporting a named
-  const (`envDb`, `envAuth`). `SKIP_ENV_VALIDATION=1` bypasses in CI.
+- Env validated per package with `@t3-oss/env-core` + zod (`@t3-oss/env-nextjs` in Next.js
+  apps). One `env-*.ts` per concern (`env-db.ts`, `env-auth.ts`, `env-client.ts`,
+  `env-server.ts`), each exporting a named const (`envDb`, `envAuth`).
+  `SKIP_ENV_VALIDATION=1` bypasses in CI.
+- Client-exposed vars: `VITE_` prefix in Start (`clientPrefix: "VITE_"`,
+  `runtimeEnv: import.meta.env`), `NEXT_PUBLIC_` in Next.js. Server-only packages read
+  `process.env` in both.
 
 ## Monorepo shape
 
 Turborepo + bun workspaces. `workspaces.packages: ["apps/*", "packages/*"]`.
 
-- `apps/*` deployables (Next.js).
+- `apps/*` deployables (TanStack Start, or Next.js per the framework rule).
 - `packages/db` drizzle schema, client, migrations, seeds.
 - `packages/auth` better-auth: drizzle adapter, plugins, `permissions.ts` for access control.
 - `packages/api` tRPC router, context, handler, react/server glue. Keep `TRPC_ENDPOINT` in a
   server-free `config.ts` so client components never pull the db in.
-- `packages/ui` shadcn/ui (`new-york`, neutral, cssVariables), tailwind v4 via
-  `@tailwindcss/postcss`, shared `globals.css`.
+- `packages/ui` shadcn/ui on Base UI (`@base-ui/react`), never Radix. Neutral, cssVariables,
+  tailwind v4 via `@tailwindcss/postcss`, shared `globals.css`.
 - `packages/commons` shared consts, utils, zod schemas. Minimal dependencies.
-- `packages/typescript-config` `base.json`, `react-library.json`, `nextjs.json`.
+- `packages/typescript-config` `base.json`, `react-library.json`, `tanstack-start.json`,
+  `nextjs.json`.
 - `services/*` for non-JS or separately-deployed services (scrapers, workers).
 
 Naming: `@workspace/*`, deps as `workspace:*`. Pin shared versions in bun
@@ -38,15 +71,16 @@ Naming: `@workspace/*`, deps as `workspace:*`. Pin shared versions in bun
 `turbo.json`: `ui: "tui"`. Declare every env var prefix in `globalEnv` or turbo will
 cache across differing environments. All `db:*` and `dev*` tasks get
 `cache: false` and `persistent: true`. `build` gets `dependsOn: ["^build"]`,
-`inputs: ["$TURBO_DEFAULT$", ".env*"]`, `outputs: [".next/**", "!.next/cache/**"]`.
+`inputs: ["$TURBO_DEFAULT$", ".env*"]`, `outputs: ["dist/**", ".output/**", ".next/**",
+"!.next/cache/**"]`.
 
 Root scripts proxy to turbo (`"db:migrate": "turbo db:migrate"`). Package-level db scripts
 load the root env explicitly: `bun --env-file='../../.env' drizzle-kit generate`.
 
 ## Single app shape
 
-Flat Next.js app. `db/` at the root instead of `packages/db`, same internals and same
-naming rules. `env.ts` + `env-client.ts` at root. Path alias `@/*`. No turbo, no catalog.
+Flat TanStack Start app (or Next.js per the framework rule). `db/` at the root instead of
+`packages/db`, same internals and same naming rules. `env.ts` + `env-client.ts` at root. Path alias `@/*`. No turbo, no catalog.
 
 ## Database
 
@@ -190,7 +224,8 @@ package owns every key shape, so the whole keyspace is greppable in one file:
 const PROJECT = "myapp";
 
 function redisKey(key: string) {
-  return `${PROJECT}:${envCommons.NEXT_PUBLIC_ENV}:${key}`;
+  // VITE_APP_ENV in Start, NEXT_PUBLIC_APP_ENV in Next.js
+  return `${PROJECT}:${envCommons.APP_ENV}:${key}`;
 }
 
 export const RedisKey = {
@@ -334,8 +369,8 @@ Notes and traps:
   `timestamp` column through the cache needs revival at the edge of the query layer.
 - A failed mutation still invalidates. drizzle calls `onMutate` whether or not the statement
   succeeded, so a rejected insert flushes the cache for that table. Conservative, not wrong.
-- **Nothing in the db package may `import "server-only"`.** The seed, migrate and reset
-  scripts import the db client under plain bun, where that package throws
+- **Nothing in the db package may `import "server-only"`** (Next.js apps). The seed, migrate
+  and reset scripts import the db client under plain bun, where that package throws
   `This module cannot be imported from a Client Component module`. It only no-ops under the
   `react-server` export condition. Mark the query layer server-only, never the client or the
   cache adapter.
@@ -380,7 +415,7 @@ Four things bite here:
 ## Data layer in apps
 
 TanStack query / table / form / charts. zod for schemas. tRPC when there is more than one
-consumer, plain server actions when there is one.
+consumer, `createServerFn` when there is one (server actions in Next.js apps).
 
 ## Email
 
