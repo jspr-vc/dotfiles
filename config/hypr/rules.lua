@@ -63,6 +63,8 @@ hl.window_rule({
 })
 
 -- XWayland popups: no decorations, they are menus and tooltips
+    no_initial_focus = true,
+    suppress_event = "activate activatefocus",
 hl.window_rule({
     name = "xwayland-popups",
     match = { xwayland = true, title = "^(win[0-9]+)$" },
