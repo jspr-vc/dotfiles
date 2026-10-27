@@ -42,3 +42,6 @@
 
 Before scaffolding any new project or app, read `~/.claude/docs/scaffold-strategy.md`: monorepo and single-app shapes, tooling, the Neon Postgres driver, db naming conventions, local infra.
 
+## 3D printing
+
+Before writing an STL or a Bambu Studio 3MF, read `~/.claude/docs/3d-printing.md`: always ship a 3MF with the STL, the default slicer settings, the support settings, command line notes.
