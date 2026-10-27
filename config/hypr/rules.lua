@@ -12,7 +12,11 @@ hl.window_rule({ name = "fullscreen-idle-inhibit", match = { class = ".*" }, idl
 hl.window_rule({ name = "center-floating", match = { float = true, xwayland = false }, center = true })
 
 -- Modals
-hl.window_rule({ name = "1password-float", match = { class = "^(1password)$" }, float = true })
+hl.window_rule({
+    name = "1password-float",
+    match = { class = "^(1password|com\\.onepassword\\.OnePassword)$" },
+    float = true,
+})
 hl.window_rule({
     name = "1password-quick-access",
     match = { title = "^(Quick Access — 1Password)$" },
@@ -59,12 +63,12 @@ hl.window_rule({
     float = true,
     pin = true,
     keep_aspect_ratio = true,
+    no_initial_focus = true,
+    suppress_event = "activate activatefocus",
     move = { "monitor_w*0.98-window_w", "monitor_h*0.97-window_h" },
 })
 
 -- XWayland popups: no decorations, they are menus and tooltips
-    no_initial_focus = true,
-    suppress_event = "activate activatefocus",
 hl.window_rule({
     name = "xwayland-popups",
     match = { xwayland = true, title = "^(win[0-9]+)$" },
@@ -107,7 +111,10 @@ hl.window_rule({ name = "xeneon-edge", match = { title = "^(xeneon-edge)$" }, mo
 
 local protected = {
     -- The SSH approval prompt is the only window titled exactly "1Password"; it stays capturable
-    { name = "1password", match = { class = "^(1password)$", title = "negative:^(1Password)$" } },
+    {
+        name = "1password",
+        match = { class = "^(1password|com\\.onepassword\\.OnePassword)$", title = "negative:^(1Password)$" },
+    },
     { name = "1password-quick-access", match = { title = "^(Quick Access — 1Password)$" } },
     -- TEMP: polkit prompt unhidden from capture, restore this line when done
     -- { name = "polkit-agent", layer = true, match = { namespace = "^(caelestia-polkit)$" } },
