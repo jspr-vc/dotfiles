@@ -1,5 +1,6 @@
 local binds = require("lib.binds")
 local rules = require("rules")
+local util = require("lib.util")
 
 local bind = binds.bind
 local MOD = "SUPER"
@@ -82,9 +83,11 @@ bind(
     "[Launcher|Apps] system monitor"
 )
 
-hl.workspace_rule({
-    workspace = "special:terminal",
-    on_created_empty = "[float; center; size 70% 60%; animation slide top] " .. terminal,
+util.on_created_empty("special:terminal", terminal, {
+    float = true,
+    center = true,
+    size = { "monitor_w*0.7", "monitor_h*0.6" },
+    animation = "slide top",
 })
 
 --------------------------------------------------------------------------

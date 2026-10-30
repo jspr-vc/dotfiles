@@ -86,4 +86,16 @@ function M.rgba(hex, alpha)
     return "rgba(" .. hex .. (alpha or "ff") .. ")"
 end
 
+--- Replaces the deprecated on_created_empty workspace rule.
+---@param workspace string e.g. "special:terminal"
+---@param cmd string
+---@param rules? table<string, string|number|boolean|table>
+function M.on_created_empty(workspace, cmd, rules)
+    hl.on("workspace.created", function(ws)
+        if ws and ws.name == workspace and ws.is_empty then
+            hl.exec_cmd(cmd, rules)
+        end
+    end)
+end
+
 return M
