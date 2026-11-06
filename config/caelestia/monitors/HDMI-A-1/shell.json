@@ -4,5 +4,8 @@
             "enabled": true,
             "position": "bottom-right"
         }
+    },
+    "lock": {
+        "enabled": false
     }
 }
