@@ -51,7 +51,8 @@
     "tw@technical-writing-skills": true,
     "vercel@claude-plugins-official": true,
     "drawio@drawio": true,
-    "show-me@skills": true
+    "show-me@skills": true,
+    "stripe@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "typesafe-ai": {
