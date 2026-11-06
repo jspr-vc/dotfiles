@@ -15,6 +15,10 @@ Whenever a task writes an STL for printing, also write a Bambu Studio project (`
 
 List every changed process key in `different_settings_to_system[0]`, or Bambu Studio does not show them as edits to the preset.
 
+## Ironing
+
+Turn ironing on when the part has a flat top surface that shows; leave it off otherwise, since it adds print time. Apply it to the finished 3MF with the `apply-ironing` skill, which sets each object's values from the flmnt filament database without touching the process preset, and asks the user before using untested starting values.
+
 ## Support settings ("perfect support")
 
 Apply these when a part needs supports. Leave supports off when it doesn't.
