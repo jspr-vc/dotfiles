@@ -29,6 +29,8 @@ hl.config({
         dim_special = 0.3,
         blur = {
             enabled = true,
+            size = 8,
+            passes = 3,
             xray = true,
             special = true,
             popups = true,
